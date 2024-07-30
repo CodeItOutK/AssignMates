@@ -1,5 +1,6 @@
+import 'package:assignmates/models/teacher.dart';
 import 'package:flutter/material.dart';
-import '../uploadAssignments/history.dart';
+import 'package:assignmates/teacher/history.dart';
 import 'teachersignup.dart';
 import 'package:assignmates/database/database.dart';
 
@@ -27,6 +28,7 @@ class TeacherLoginScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              SizedBox(height: 100,),
               CircleAvatar(
                 radius: 120,
                 backgroundImage: AssetImage('assets/images/teacher.jpg'), // Add your teacher image asset here
@@ -52,11 +54,12 @@ class TeacherLoginScreen extends StatelessWidget {
               ElevatedButton(
                 onPressed: () async {
                   // login teacher
-                  String retVal=await AuthMethods().loginTeacher(email.text, password.text);
-                  if(retVal=="success"){
+                  Teacher? retVal=await AuthMethods().loginTeacher(email.text, password.text);
+                  //get name of the teacher
+                  if(retVal!.name!=''){
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const History()),
+                      MaterialPageRoute(builder: (context) => History(name: retVal!.name,)),
                     );
                   }
                 },

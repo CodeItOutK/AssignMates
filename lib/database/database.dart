@@ -1,3 +1,5 @@
+import 'package:assignmates/models/student.dart';
+import 'package:assignmates/models/teacher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -13,11 +15,11 @@ class AuthMethods {
 
       // Add user details to the 'teachers' collection
       await _firestore.collection('teachers').doc(authResult.user!.uid).set(
-          {
-            'name':fullName,
-            'email':email,
-            'accountCreated':Timestamp.now(),
-          }
+        {
+          'name': fullName,
+          'email': email,
+          'accountCreated': Timestamp.now(),
+        },
       );
 
       retval = "success";
@@ -26,21 +28,61 @@ class AuthMethods {
     }
     return retval;
   }
-  Future<String> signUpStudent(String email, String password, String fullName,String enroll,String class1) async {
+
+  Future<Student> getStudentInfo(String id) async {
+    var student = Student();
+    try {
+      DocumentSnapshot _documentSnapshot = await _firestore.collection('students').doc(id).get();
+      if (_documentSnapshot.exists) {
+        // Check if the document exists
+        Map<String, dynamic> data = _documentSnapshot.data() as Map<String, dynamic>;
+        student.name = data['name'] ?? '';
+        student.email = data['email'] ?? '';
+        student.enroll = data['enroll'] ?? '';
+        student.branch = data['class'] ?? '';
+        student.accountCreated = data['accountCreated'] ?? '';
+      } else {
+        print('Cannot fetch student info');
+      }
+    } catch (e) {
+      print('Error fetching student info: $e');
+    }
+    return student;
+  }
+
+  Future<Teacher> getTeacherInfo(String id) async {
+    var teacher = Teacher();
+    try {
+      DocumentSnapshot _documentSnapshot = await _firestore.collection('teachers').doc(id).get();
+      if (_documentSnapshot.exists) {
+        // Check if the document exists
+        Map<String, dynamic> data = _documentSnapshot.data() as Map<String, dynamic>;
+        teacher.name = data['name'] ?? '';
+        teacher.email = data['email'] ?? '';
+      } else {
+        print('Cannot fetch teacher info');
+      }
+    } catch (e) {
+      print('Error fetching teacher info: $e');
+    }
+    return teacher;
+  }
+
+  Future<String> signUpStudent(String email, String password, String fullName, String enroll, String class1) async {
     String retval = "error";
     try {
       // Create the user with email and password
       UserCredential authResult = await _auth.createUserWithEmailAndPassword(email: email, password: password);
 
-      // Add user details to the 'teachers' collection
+      // Add user details to the 'students' collection
       await _firestore.collection('students').doc(authResult.user!.uid).set(
-          {
-            'email':email,
-            'name':fullName,
-            'enroll':enroll,
-            'class':class1,
-            'accountCreated':Timestamp.now(),
-          }
+        {
+          'email': email,
+          'name': fullName,
+          'enroll': enroll,
+          'class': class1,
+          'accountCreated': Timestamp.now(),
+        },
       );
 
       retval = "success";
@@ -50,26 +92,23 @@ class AuthMethods {
     return retval;
   }
 
-  Future<String> loginTeacher(String email, String password) async {
-    String retVal = "error";
+  Future<Teacher?> loginTeacher(String email, String password) async {
     try {
-      await _auth.signInWithEmailAndPassword(email: email, password: password);
-      retVal = "success";
+      var _authResult = await _auth.signInWithEmailAndPassword(email: email, password: password);
+      return await getTeacherInfo(_authResult.user!.uid);
     } catch (e) {
-      print(e);
-      retVal = e.toString();
+      print('Error logging in teacher: $e');
+      return null;
     }
-    return retVal;
   }
-  Future<String> loginStudent(String email, String password) async {
-    String retVal = "error";
+
+  Future<Student?> loginStudent(String email, String password) async {
     try {
-      await _auth.signInWithEmailAndPassword(email: email, password: password);
-      retVal = "success";
+      var _authResult = await _auth.signInWithEmailAndPassword(email: email, password: password);
+      return await getStudentInfo(_authResult.user!.uid);
     } catch (e) {
-      print(e);
-      retVal = e.toString();
+      print('Error logging in student: $e');
+      return null;
     }
-    return retVal;
   }
 }

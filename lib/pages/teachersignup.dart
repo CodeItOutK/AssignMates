@@ -1,6 +1,6 @@
 import 'package:assignmates/database/database.dart';
 import 'package:flutter/material.dart';
-import 'package:assignmates/uploadAssignments/history.dart';
+import 'package:assignmates/teacher/history.dart';
 
 class TeacherSignupScreen extends StatelessWidget {
   final TextEditingController name = TextEditingController();
@@ -64,7 +64,7 @@ class TeacherSignupScreen extends StatelessWidget {
                   if(retVal=="success"){
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const History()),
+                      MaterialPageRoute(builder: (context) => History(name: name.text,)),
                     );
                   }
                 },

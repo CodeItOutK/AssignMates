@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'studentsignup.dart';
 import 'package:assignmates/database/database.dart';
-import 'package:assignmates/uploadAssignments/history.dart';
+import 'package:assignmates/student/record.dart';
+import 'package:assignmates/models/student.dart';
 
 class StudentLoginScreen extends StatelessWidget {
   const StudentLoginScreen({super.key});
@@ -57,11 +58,14 @@ class StudentLoginScreen extends StatelessWidget {
                 const SizedBox(height: 30),
                 ElevatedButton(
                   onPressed: () async {
-                    String retVal=await AuthMethods().loginTeacher(email.text, password.text);
-                    if(retVal=="success"){
+                    Student? retVal=await AuthMethods().loginStudent(email.text, password.text);
+                    if(retVal?.enroll!=''){
+                      //fetch info corresponding to this user
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const History()),
+                        MaterialPageRoute(
+                            builder: (context) => StudentRecords(name: retVal!.name,
+                            email: retVal!.email,branch: retVal.branch,enroll: retVal.enroll,)),
                       );
                     }
                     // Handle sign-in logic here

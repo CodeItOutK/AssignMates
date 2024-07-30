@@ -1,6 +1,6 @@
 import 'package:assignmates/database/database.dart';
 import 'package:flutter/material.dart';
-import 'package:assignmates/uploadAssignments/history.dart';
+import 'package:assignmates/student/record.dart';
 
 class StudentSignupScreen extends StatelessWidget {
   const StudentSignupScreen({super.key});
@@ -91,7 +91,7 @@ class StudentSignupScreen extends StatelessWidget {
                   if(retVal=="success"){
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const History()),
+                      MaterialPageRoute(builder: (context) => StudentRecords(name: name.text,email: email.text,enroll: enroll.text,branch: branch!,)),
                     );
                   }
                   // Handle sign-up logic here

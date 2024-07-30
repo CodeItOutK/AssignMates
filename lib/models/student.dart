@@ -4,4 +4,5 @@ class Student{
   dynamic enroll;
   dynamic email;
   dynamic password;
+  dynamic accountCreated;
 }
