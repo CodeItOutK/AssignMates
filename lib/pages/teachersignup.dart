@@ -1,4 +1,5 @@
 import 'package:assignmates/database/database.dart';
+import 'package:assignmates/pages/teacheruploadpage.dart';
 import 'package:flutter/material.dart';
 import 'package:assignmates/uploadAssignments/history.dart';
 
@@ -64,7 +65,7 @@ class TeacherSignupScreen extends StatelessWidget {
                   if(retVal=="success"){
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const History()),
+                      MaterialPageRoute(builder: (context) => TeacherUploadPage()),
                     );
                   }
                 },

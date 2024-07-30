@@ -1,3 +1,4 @@
+import 'package:assignmates/pages/teacheruploadpage.dart';
 import 'package:flutter/material.dart';
 import '../uploadAssignments/history.dart';
 import 'teachersignup.dart';
@@ -56,7 +57,7 @@ class TeacherLoginScreen extends StatelessWidget {
                   if(retVal=="success"){
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const History()),
+                      MaterialPageRoute(builder: (context) => TeacherUploadPage()),
                     );
                   }
                 },
