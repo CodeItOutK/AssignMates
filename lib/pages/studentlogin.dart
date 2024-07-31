@@ -33,7 +33,7 @@ class StudentLoginScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const SizedBox(height: 120),
+                // const SizedBox(height: 120),
                 const CircleAvatar(
                   backgroundImage: AssetImage('assets/images/th(4).jpeg'),
                   radius: 100,
