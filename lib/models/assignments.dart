@@ -1,12 +1,14 @@
 class Assignment {
+  String title;
   String id;
   String teacherId;
   List<String> fileUrls;
   List<Map<String, String>> classes;
   String instructions;
-  String deadline;
+  dynamic deadline;
 
   Assignment({
+    required this.title,
     required this.id,
     required this.teacherId,
     required this.fileUrls,
@@ -17,6 +19,7 @@ class Assignment {
 
   Map<String, dynamic> toJson() {
     return {
+      'title':title,
       'id': id,
       'teacherId': teacherId,
       'fileUrls': fileUrls,
@@ -28,6 +31,7 @@ class Assignment {
 
   static Assignment fromJson(Map<String, dynamic> json) {
     return Assignment(
+      title: json['title'],
       id: json['id'],
       teacherId: json['teacherId'],
       fileUrls: List<String>.from(json['fileUrls']),
