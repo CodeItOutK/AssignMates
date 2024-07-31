@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:assignmates/database/database.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -47,10 +46,52 @@ class _StudentRecordsState extends State<StudentRecords> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Hello ${widget.name}'),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        leading:
+          Container(
+            margin: EdgeInsets.all(10),
+            padding: EdgeInsets.all(5),
+            child: GestureDetector(
+              onTap: (){
+                //cant use pop-context bcox u came from push and removed until
+                Navigator.pop(context);
+              },
+              child: Container(decoration:BoxDecoration(color: Color(0xFFFFFACA),
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.yellow.withOpacity(0.5),
+                    spreadRadius: 5,
+                    blurRadius: 7,
+                    offset: Offset(0, 3), // changes position of shadow
+                  ),
+                ],
+              ),child: Padding(
+                  padding: EdgeInsets.all(3),
+                  child: Icon(Icons.arrow_back_ios,color: Colors.brown,size: 20,)),),
+            ),
+          ),
+
+        title: Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic, // Add this line
+          children: [
+            Text(
+              '${widget.enroll} :',
+              style: TextStyle(fontSize: 16, color: Colors.white,fontWeight: FontWeight.bold),
+            ),
+            SizedBox(width: 6),
+            Text(
+              '${widget.name}',
+              style: TextStyle(color: Colors.white, fontSize: 16,fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      )
+
+      ,
+      body: ListView(
+        children:[ Column(
           children: [
             StreamBuilder<QuerySnapshot>(
               stream: _stream, // Stream of all the assignments
@@ -103,7 +144,7 @@ class _StudentRecordsState extends State<StudentRecords> {
               },
             ),
           ],
-        ),
+        ),]
       ),
     );
   }
@@ -192,33 +233,71 @@ class _AssignmentBubbleState extends State<AssignmentBubble> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Title: ${widget.title}',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF679289),
-            ),
+          Row(
+            children: [
+              Text(
+                'Title:',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                  color: Colors.brown,
+                ),
+              ),
+              Text(
+                '${widget.title}',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: Color(0xFF679289),
+                ),
+              ),
+            ],
+          ),
+
+          SizedBox(height: 6),
+          Row(
+            children: [
+              Text(
+                // 'Deadline: $deadline',
+                'Deadline :',
+                style: TextStyle(
+                  color: Colors.brown,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                // 'Deadline: $deadline',
+                '${_timeUntil[0]}',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 6),
+          Row(
+            children: [
+              Text(
+                'Instructions:',
+                style: TextStyle(
+                  color: Colors.brown,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+              Text(
+                '${widget.instructions}',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 14,
+                ),
+              ),
+            ],
           ),
           SizedBox(height: 6),
           Text(
-            // 'Deadline: $deadline',
-            'Deadline :${_timeUntil[0]}',
-            style: TextStyle(
-              color: Colors.red,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          SizedBox(height: 6),
-          Text(
-            'Instructions: ${widget.instructions}',
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 14,
-            ),
-          ),
-          SizedBox(height: 6),
-          Text(
-            'Files:',
+            'Files -> ',
             style: TextStyle(
               fontWeight: FontWeight.w700,
               color: Colors.brown,
@@ -228,12 +307,18 @@ class _AssignmentBubbleState extends State<AssignmentBubble> {
             children: widget.fileUrls.map((fileUrl) {
               return InkWell(
                 onTap: () => _openFile(fileUrl),
-                child: Text(
-                  fileUrl.split('/').last,
-                  style: TextStyle(
-                    color: Color(0xFF679289),
-                    decoration: TextDecoration.underline,
-                  ),
+                child: Row(
+                  children: [
+                    Icon(Icons.book_outlined),
+                    Text(
+                      '${widget.title}.asset',
+                      // fileUrl.split('/').last,
+                      style: TextStyle(
+                        color: Color(0xFF679289),
+                        decoration: TextDecoration.underline,
+                      ),
+                    )
+                  ],
                 ),
               );
             }).toList(),
@@ -243,4 +328,3 @@ class _AssignmentBubbleState extends State<AssignmentBubble> {
     );
   }
 }
-
