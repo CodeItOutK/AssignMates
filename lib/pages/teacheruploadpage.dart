@@ -1,3 +1,156 @@
+// import 'dart:io';
+// import 'package:file_picker/file_picker.dart';
+// import 'package:flutter/material.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:firebase_storage/firebase_storage.dart';
+// import 'package:uuid/uuid.dart';
+// import '../models/assignments.dart';
+// import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
+//
+// class TeacherUploadPage extends StatefulWidget {
+//   final String id;
+//
+//   @override
+//   TeacherUploadPage({
+//     required this.id,
+// });
+//   _TeacherUploadPageState createState() => _TeacherUploadPageState();
+// }
+//
+// class _TeacherUploadPageState extends State<TeacherUploadPage> {
+//   final _formKey = GlobalKey<FormState>();
+//   final TextEditingController _instructionsController = TextEditingController();
+//   final TextEditingController _deadlineController = TextEditingController();
+//   final TextEditingController _title=TextEditingController();
+//   List<File> _files = [];
+//   List<Map<String, String>> _selectedClasses = [];
+//   String _branch = 'CS';
+//   String _year = '1st Year';
+//   String _section = 'A';
+//   bool _isLoading = false; // Loading state
+//
+//   Future<void> _pickFile() async {
+//     FilePickerResult? result = await FilePicker.platform.pickFiles();
+//
+//     if (result != null) {
+//       setState(() {
+//         _files.add(File(result.files.single.path!));
+//       });
+//     }
+//   }
+//
+//   void _addClass() {
+//     setState(() {
+//       _selectedClasses.add({
+//         'branch': _branch,
+//         'year': _year,
+//         'section': _section,
+//       });
+//       // Clear values after adding class
+//       _branch = 'Select Branch';
+//       _year = 'Select Year';
+//       _section = 'Select Section';
+//     });
+//   }
+//
+//   void _removeClass(int index) {
+//     setState(() {
+//       _selectedClasses.removeAt(index);
+//     });
+//   }
+//
+//   void _removeFile(int index) {
+//     setState(() {
+//       _files.removeAt(index);
+//     });
+//   }
+//
+//
+//   DateTime _selectedDate=DateTime.now();//the users sets this date and initially is current date and time as soon as user enters this page
+//
+//   Future<void> _pickDeadline(BuildContext context)async{
+//     //show-date time picker and set the selected date
+//     final DateTime? picked=await DatePicker.showDateTimePicker(context,showTitleActions: true,locale: LocaleType.en);
+//     if(picked!=null&&picked!=_selectedDate){
+//       _selectedDate=picked;
+//       setState(() {
+//
+//       });
+//     }
+//     _deadlineController.text=_selectedDate.toString() as TextEditingValue;
+//   }
+//
+//   // void _pickDeadline() async {
+//   //   DateTime? selectedDate = await showDatePicker(
+//   //     context: context,
+//   //     initialDate: DateTime.now(),
+//   //     firstDate: DateTime(2020),
+//   //     lastDate: DateTime(2101),
+//   //   );
+//   //
+//   //   if (selectedDate != null) {
+//   //     setState(() {
+//   //       _deadlineController.text = "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}";
+//   //     });
+//   //   }
+//   // }
+//
+//   void _uploadAssignment() async {
+//     if (_formKey.currentState!.validate() && _files.isNotEmpty) {
+//       setState(() {
+//         _isLoading = true; // Show loading indicator
+//       });
+//
+//       try {
+//         // Upload files to Firebase Storage and get URLs
+//         List<String> fileUrls = [];
+//         for (File file in _files) {
+//           String fileName = file.path.split('/').last;
+//           FirebaseStorage storage = FirebaseStorage.instance;
+//           Reference ref = storage.ref().child('assignments/$fileName');
+//           UploadTask uploadTask = ref.putFile(file);
+//
+//           // Show upload progress
+//           uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
+//             // You can show the progress if needed
+//             print('Upload progress: ${(snapshot.bytesTransferred / snapshot.totalBytes) * 100}%');
+//           });
+//
+//           TaskSnapshot taskSnapshot = await uploadTask;
+//           String fileUrl = await taskSnapshot.ref.getDownloadURL();
+//           fileUrls.add(fileUrl);
+//         }
+//
+//         // Create an assignment object
+//         Assignment assignment = Assignment(
+//           title: _title.text,
+//           id: Uuid().v4(),
+//           teacherId: widget.id, // Replace with actual teacher ID
+//           fileUrls: fileUrls,
+//           classes: _selectedClasses,
+//           instructions: _instructionsController.text,
+//           deadline: _selectedDate,
+//         );
+//
+//         // Save the assignment data to Firestore
+//         FirebaseFirestore firestore = FirebaseFirestore.instance;
+//         await firestore.collection('assignments').doc(assignment.id).set(assignment.toJson());
+//
+//         // Show a success message
+//         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Assignment uploaded successfully')));
+//       } catch (e) {
+//         // Handle errors
+//         print("Error uploading assignment: $e");
+//         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to upload assignment')));
+//       } finally {
+//         setState(() {
+//           _isLoading = false; // Hide loading indicator
+//         });
+//       }
+//     } else {
+//       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please select a file and fill all fields')));
+//     }
+//   }
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -5,14 +158,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:uuid/uuid.dart';
 import '../models/assignments.dart';
+import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 
 class TeacherUploadPage extends StatefulWidget {
   final String id;
 
-  @override
   TeacherUploadPage({
     required this.id,
-});
+  });
+
+  @override
   _TeacherUploadPageState createState() => _TeacherUploadPageState();
 }
 
@@ -20,10 +175,10 @@ class _TeacherUploadPageState extends State<TeacherUploadPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _instructionsController = TextEditingController();
   final TextEditingController _deadlineController = TextEditingController();
-  final TextEditingController _title=TextEditingController();
+  final TextEditingController _title = TextEditingController();
   List<File> _files = [];
   List<Map<String, String>> _selectedClasses = [];
-  String _branch = 'CSE';
+  String _branch = 'CS';
   String _year = '1st Year';
   String _section = 'A';
   bool _isLoading = false; // Loading state
@@ -64,17 +219,19 @@ class _TeacherUploadPageState extends State<TeacherUploadPage> {
     });
   }
 
-  void _pickDeadline() async {
-    DateTime? selectedDate = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2101),
-    );
+  DateTime _selectedDate = DateTime.now(); // Initially set to current date and time
 
-    if (selectedDate != null) {
+  Future<void> _pickDeadline(BuildContext context) async {
+    // Show date-time picker and set the selected date
+    final DateTime? picked = await DatePicker.showDateTimePicker(
+      context,
+      showTitleActions: true,
+      locale: LocaleType.en,
+    );
+    if (picked != null && picked != _selectedDate) {
       setState(() {
-        _deadlineController.text = "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}";
+        _selectedDate = picked;
+        _deadlineController.text = _selectedDate.toString();
       });
     }
   }
@@ -97,7 +254,8 @@ class _TeacherUploadPageState extends State<TeacherUploadPage> {
           // Show upload progress
           uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
             // You can show the progress if needed
-            print('Upload progress: ${(snapshot.bytesTransferred / snapshot.totalBytes) * 100}%');
+            print(
+                'Upload progress: ${(snapshot.bytesTransferred / snapshot.totalBytes) * 100}%');
           });
 
           TaskSnapshot taskSnapshot = await uploadTask;
@@ -113,26 +271,32 @@ class _TeacherUploadPageState extends State<TeacherUploadPage> {
           fileUrls: fileUrls,
           classes: _selectedClasses,
           instructions: _instructionsController.text,
-          deadline: _deadlineController.text,
+          deadline: _selectedDate,
         );
 
         // Save the assignment data to Firestore
         FirebaseFirestore firestore = FirebaseFirestore.instance;
-        await firestore.collection('assignments').doc(assignment.id).set(assignment.toJson());
+        await firestore
+            .collection('assignments')
+            .doc(assignment.id)
+            .set(assignment.toJson());
 
         // Show a success message
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Assignment uploaded successfully')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Assignment uploaded successfully')));
       } catch (e) {
         // Handle errors
         print("Error uploading assignment: $e");
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to upload assignment')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to upload assignment')));
       } finally {
         setState(() {
           _isLoading = false; // Hide loading indicator
         });
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please select a file and fill all fields')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please select a file and fill all fields')));
     }
   }
 
@@ -190,9 +354,12 @@ class _TeacherUploadPageState extends State<TeacherUploadPage> {
                             value: _branch,
                             items: [
                               'Select Branch',
-                              'CSE',
-                              'ECE',
+                              'CS',
+                              'E&I',
                               'MECH'
+                              'CIVIL'
+                              'ETC',
+                              'IT',
                             ].map((String branch) {
                               return DropdownMenuItem(
                                 value: branch,
@@ -298,7 +465,9 @@ class _TeacherUploadPageState extends State<TeacherUploadPage> {
                   controller: _deadlineController,
                   decoration: InputDecoration(labelText: 'Deadline'),
                   readOnly: true,
-                  onTap: _pickDeadline,
+                  onTap: () async{
+                      await _pickDeadline(context);
+    }
                 ),
                 ElevatedButton(
                   onPressed: () {

@@ -21,8 +21,9 @@ class MyApp extends StatelessWidget {
       title: 'Assignmates',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSwatch().copyWith(
-          primary: const Color.fromARGB(255, 11, 74, 15),
-          secondary: const Color.fromARGB(255, 87, 34, 3),
+          primary:Color(0xFF5366FF),
+          // primary: const Color.fromARGB(255, 11, 74, 15),
+          secondary: Color(0xFF02C798),
         ),
         textTheme: const TextTheme(
           bodyMedium: TextStyle(color: Color.fromARGB(255, 0, 0, 0)),

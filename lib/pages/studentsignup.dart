@@ -11,7 +11,9 @@ class StudentSignupScreen extends StatelessWidget {
     TextEditingController enroll = TextEditingController();
     TextEditingController email = TextEditingController();
     TextEditingController password = TextEditingController();
-    String? branch; // Make branch nullable
+    String branch='CS'; // Make branch nullable
+    String section='A';
+    String year='4th Year';
 
     return Scaffold(
       appBar: AppBar(
@@ -49,14 +51,46 @@ class StudentSignupScreen extends StatelessWidget {
                   labelText: 'Class',
                   border: OutlineInputBorder(),
                 ),
-                items: ['CSA', 'IT', 'MECH', 'E&I', 'CIVIL', 'ETC']
+                items: ['CS', 'IT', 'MECH', 'E&I', 'CIVIL', 'ETC']
                     .map((classOption) => DropdownMenuItem<String>(
                   value: classOption,
                   child: Text(classOption),
                 ))
                     .toList(),
                 onChanged: (value) {
-                  branch = value;
+                  branch = value.toString();
+                },
+              ),
+              const SizedBox(height: 20),
+              DropdownButtonFormField<String>(
+                decoration: const InputDecoration(
+                  labelText: 'Section',
+                  border: OutlineInputBorder(),
+                ),
+                items: ['A', 'B', 'C']
+                    .map((classOption) => DropdownMenuItem<String>(
+                  value: classOption,
+                  child: Text(classOption),
+                ))
+                    .toList(),
+                onChanged: (value) {
+                  section = value.toString();
+                },
+              ),
+              const SizedBox(height: 20),
+              DropdownButtonFormField<String>(
+                decoration: const InputDecoration(
+                  labelText: 'Year',
+                  border: OutlineInputBorder(),
+                ),
+                items: ['1st Year', '2nd Year', '3rd Year', '4th Year']
+                    .map((classOption) => DropdownMenuItem<String>(
+                  value: classOption,
+                  child: Text(classOption),
+                ))
+                    .toList(),
+                onChanged: (value) {
+                  year = value.toString();
                 },
               ),
               const SizedBox(height: 20),
@@ -87,11 +121,11 @@ class StudentSignupScreen extends StatelessWidget {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () async {
-                  String retVal=await AuthMethods().signUpStudent(email.text, password.text, name.text,enroll.text,branch!);
+                  String retVal=await AuthMethods().signUpStudent(email.text, password.text, name.text,enroll.text,branch!,section!,year!);
                   if(retVal=="success"){
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => StudentRecords(name: name.text,email: email.text,enroll: enroll.text,branch: branch!,)),
+                      MaterialPageRoute(builder: (context) => StudentRecords(name: name.text,email: email.text,enroll: enroll.text,branch: branch!,year: year!,section: section!,)),
                     );
                   }
                   // Handle sign-up logic here

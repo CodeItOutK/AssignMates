@@ -16,7 +16,7 @@ class TeacherLoginScreen extends StatelessWidget {
           'Teacher Login',
           style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: Theme.of(context).colorScheme.secondary,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),

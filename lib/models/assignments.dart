@@ -5,7 +5,7 @@ class Assignment {
   List<String> fileUrls;
   List<Map<String, String>> classes;
   String instructions;
-  String deadline;
+  dynamic deadline;
 
   Assignment({
     required this.title,

@@ -65,7 +65,7 @@ class StudentLoginScreen extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                             builder: (context) => StudentRecords(name: retVal!.name,
-                              email: retVal!.email,branch: retVal.branch,enroll: retVal.enroll,)),
+                              email: retVal!.email,branch: retVal.branch!,enroll: retVal.enroll!,year: retVal.year!,section: retVal.section!,)),
                       );
                     }
                     // Handle sign-in logic here
