@@ -303,7 +303,31 @@ class _TeacherUploadPageState extends State<TeacherUploadPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Upload Assignment')),
+      appBar: AppBar(
+        leading: Container(
+          margin: EdgeInsets.all(10),
+          padding: EdgeInsets.all(5),
+          child: GestureDetector(
+            onTap: (){
+              //cant use pop-context bcox u came from push and removed until
+              Navigator.pop(context);
+            },
+            child: Container(decoration:BoxDecoration(color: Colors.white,
+              borderRadius: BorderRadius.circular(30),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.yellow.withOpacity(0.5),
+                  spreadRadius: 5,
+                  blurRadius: 7,
+                  offset: Offset(0, 3), // changes position of shadow
+                ),
+              ],
+            ),child: Padding(
+                padding: EdgeInsets.all(3),
+                child: Icon(Icons.arrow_back_ios,color: Colors.brown,size: 20,)),),
+          ),
+        ),
+        title: Text('Upload Assignment',style: TextStyle(color: Colors.white),),backgroundColor: Theme.of(context).colorScheme.primary,),
       body: Form(
         key: _formKey,
         child: Padding(

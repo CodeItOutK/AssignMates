@@ -6,6 +6,9 @@ class Student{
   dynamic email;
   dynamic password;
   dynamic accountCreated;
+  //edit-1
   dynamic year;//year
   dynamic section;//section
+//edit-2
+  late List<String>doneAssignments;
 }
