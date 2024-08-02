@@ -200,11 +200,12 @@ class _AssignmentBubbleState extends State<AssignmentBubble> {
       //called after every 1 sec take diffrence from the current-time every one second
       _timeUntil=OurTimeLeft().timeLeft(timeStamp.toDate());
       setState(() {
+        //now this student is defaulter
         //alert box is being shown just once after timer[0]'s value becomes {}
         if (_timeUntil[0] == "Blocked Assignment") {
           //daedline exceeded
           setState(() {
-
+            AuthMethods().overDueAssignments(widget.assId, widget.teacherId);
           });
           // doTask();
         }
