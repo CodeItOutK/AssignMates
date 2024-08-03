@@ -1,9 +1,9 @@
 import 'package:assignmates/database/database.dart';
-import 'package:assignmates/pages/teacheruploadpage.dart';
+import 'package:assignmates/teacher/teacheruploadpage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:assignmates/timeLeft.dart';
+import 'package:assignmates/utilities/timeLeft.dart';
 
 class History extends StatefulWidget {
   final String? name; //name of the teacher

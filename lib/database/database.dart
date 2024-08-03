@@ -1,7 +1,11 @@
+import 'dart:io';
+import 'package:assignmates/models/assignments.dart';
 import 'package:assignmates/models/student.dart';
 import 'package:assignmates/models/teacher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:path/path.dart';
 
 class AuthMethods {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -75,6 +79,24 @@ class AuthMethods {
     return teacher;
   }
 
+  Future<String> getAssignmentName(String id) async {
+
+    // title: title, id: id, teacherId: teacherId, fileUrls: fileUrls, classes: classes, instructions: instructions, deadline: deadline
+    try {
+      DocumentSnapshot _documentSnapshot = await _firestore.collection('teachers').doc(id).get();
+      if (_documentSnapshot.exists) {
+        // Check if the document exists
+        Map<String, dynamic> data = _documentSnapshot.data() as Map<String, dynamic>;
+        return data['name'] ?? '';
+      } else {
+        print('Cannot fetch teacher info');
+      }
+    } catch (e) {
+      print('Error fetching teacher info: $e');
+    }
+    return 'unavaialable';
+  }
+
   Future<String> signUpStudent(String email, String password, String fullName, String enroll, String branch,String section,String year) async {
     String retval = "error";
     try {
@@ -145,9 +167,71 @@ class AuthMethods {
     }
   }
 
+  Future<void> doneWithAnAssignment(String assId, String teacherId, List<File> files) async {
+    String studentId = _auth.currentUser!.uid;
+    // DocumentSnapshot _docRef = await _firestore.collection('students').doc(studentId).get();
+
+    List<Map<String, dynamic>> doneAssignment = [];
+
+    try {
+      // Upload files to Firebase Storage and get URLs
+      List<String> fileUrls = [];
+      for (File file in files) {
+        String fileName = basename(file.path);
+        Reference storageRef = FirebaseStorage.instance.ref().child('assignments/$assId/$fileName');
+        UploadTask uploadTask = storageRef.putFile(file);
+        TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => {});
+        String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+        fileUrls.add(downloadUrl);
+      }
+
+      // Create the assignment submission data
+      Map<String, dynamic> assignmentData = {
+        'teacherId': teacherId,
+        'studentId': studentId,
+        'timeOfSubmit': Timestamp.now(),
+        'files': fileUrls,
+      };
+
+      doneAssignment.add(assignmentData);
+
+      // Update Firestore
+      await _firestore.collection('doneAssignments').doc(assId).set({
+        'submissions': FieldValue.arrayUnion(doneAssignment),
+      }, SetOptions(merge: true));
+
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
+  String getCurrentUser (){
+    return _auth.currentUser!.uid;
+  }
+
+  //get students submissions from submitted-assignments
+  getDoneAssignments(){
+    // String currentTeacherId=_auth.currentUser!.uid;
+    var stream=_firestore.collection('doneAssignments').snapshots();
+    return stream;
+  }
+  //todo->>>>>>>>implement fully
+  Future<List<String>> studentsDoneThatAssignment(String assId)async{
+    List<String>ids=[];
+    DocumentSnapshot _docRef=_firestore.collection('doneAssignments').doc(assId).collection('submissions').get() as DocumentSnapshot<Object?>;
+
+    if (_docRef.exists) {
+      // Assuming the teacher's name is stored under the 'name' field
+      List<Map<String, dynamic>>? data = _docRef.data() as List<Map<String, dynamic>>?;
+      for(var v in data!){
+        ids.add(v['studentId']);
+      }
+    }
+    return ids;
+  }
+
 
 }
-
 
 // import 'package:assignmates/models/student.dart';
 // import 'package:assignmates/models/teacher.dart';
@@ -194,8 +278,10 @@ class AuthMethods {
 //         student.name = data['name'] ?? '';
 //         student.email = data['email'] ?? '';
 //         student.enroll = data['enroll'] ?? '';
-//         student.branch = data['class'] ?? '';
+//         student.branch = data['branch'] ?? '';
 //         student.accountCreated = data['accountCreated'] ?? '';
+//         student.section=data['section']??'';
+//         student.year=data['year']??'';
 //       } else {
 //         print('Cannot fetch student info');
 //       }
@@ -224,7 +310,7 @@ class AuthMethods {
 //     return teacher;
 //   }
 //
-//   Future<String> signUpStudent(String email, String password, String fullName, String enroll, String class1) async {
+//   Future<String> signUpStudent(String email, String password, String fullName, String enroll, String branch,String section,String year) async {
 //     String retval = "error";
 //     try {
 //       // Create the user with email and password
@@ -237,8 +323,10 @@ class AuthMethods {
 //           'email': email,
 //           'name': fullName,
 //           'enroll': enroll,
-//           'class': class1,
+//           'branch': branch,
 //           'accountCreated': Timestamp.now(),
+//           'section':section,
+//           'year':year,
 //         },
 //       );
 //
@@ -274,4 +362,24 @@ class AuthMethods {
 //     var _stream=_firestore.collection('teachers').snapshots();
 //     return _stream;
 //   }
+//
+//   Future<String> getTeacherNameFromId(String teacherId) async {
+//     // Fetch the document from the 'teachers' collection using the teacherId
+//     DocumentSnapshot _docRef = await FirebaseFirestore.instance
+//         .collection('teachers')
+//         .doc(teacherId)
+//         .get();
+//
+//     // Check if the document exists and retrieve the 'name' field
+//     if (_docRef.exists) {
+//       // Assuming the teacher's name is stored under the 'name' field
+//       Map<String, dynamic>? data = _docRef.data() as Map<String, dynamic>?;
+//       return data?['name'] ?? 'Unknown'; // Default to 'Unknown' if name field is missing
+//     } else {
+//       return 'Teacher not found';
+//     }
+//   }
+//
+//
 // }
+//
