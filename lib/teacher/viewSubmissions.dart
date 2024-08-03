@@ -294,9 +294,9 @@ class _SubmissionsBubbleState extends State<SubmissionsBubble> {
                             Text(
                               'file${idx++}.asset',
                               style: TextStyle(
-                                  color: Colors.white,
-                                  decoration: TextDecoration.underline,
-                                  decorationColor: Colors.white
+                                color: Colors.white,
+                                decoration: TextDecoration.underline,
+                                decorationColor: Colors.white
                               ),
                             )
                           ],
@@ -314,3 +314,197 @@ class _SubmissionsBubbleState extends State<SubmissionsBubble> {
     );
   }
 }
+
+
+// import 'package:assignmates/database/database.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:flutter/material.dart';
+// import 'package:assignmates/models/student.dart';
+//
+// class ViewSubmissions extends StatefulWidget {
+//   final dynamic assignId;
+//   final dynamic title;
+//
+//   // Constructor with parameters
+//   const ViewSubmissions({
+//     Key? key,
+//     required this.assignId,
+//     required this.title,
+//   }) : super(key: key);
+//
+//   // Constructor without parameters
+//   const ViewSubmissions.defaultConstructor({Key? key})
+//       : assignId = null,
+//         title = null,
+//         super(key: key);
+//
+//   @override
+//   State<ViewSubmissions> createState() => _ViewSubmissionsState();
+// }
+//
+// class _ViewSubmissionsState extends State<ViewSubmissions> {
+//   late Stream<QuerySnapshot> stream;
+//
+//   @override
+//   void initState() {
+//     super.initState();
+//     stream = AuthMethods().getDoneAssignments();
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         backgroundColor: Color(0xFF1CCE9C),
+//         title: Row(
+//           children: [
+//             Text('${widget.title} ',style: TextStyle(decoration: TextDecoration.underline),),
+//             Text('Submissions'),
+//           ],
+//         )
+//       ),
+//       body: StreamBuilder<QuerySnapshot>(
+//         stream: stream,
+//         builder: (context, snapshot) {
+//           if (!snapshot.hasData) {
+//             return Center(
+//               child: CircularProgressIndicator(
+//                 backgroundColor: Color(0xFF679289),
+//               ),
+//             );
+//           }
+//
+//           final messages = snapshot.data!.docs;
+//           List<SubmissionsBubble> allMessages = [];
+//           final String currentTeacher = AuthMethods().getCurrentUser();
+//
+//           for (var msg in messages) {
+//             final String assId1=msg.id;
+//             final List<dynamic> submissions = msg['submissions'];
+//             for (var submission in submissions) {
+//               final dynamic teacherId = submission['teacherId'];
+//               final dynamic timeOfSubmit = submission['timeOfSubmit'];
+//               final dynamic studentId = submission['studentId'];
+//               final String assId=assId1;
+//               final List<String> fileUrls = submission['files'] != null
+//                   ? List<String>.from(submission['files'])
+//                   : [];
+//
+//               if (currentTeacher == teacherId && widget.assignId==assId) {
+//                 allMessages.add(SubmissionsBubble(
+//                   teacherId: teacherId,
+//                   timeOfSubmit: timeOfSubmit,
+//                   studentId: studentId,
+//                   files: fileUrls,
+//                   assId: assId,
+//                 ));
+//               }
+//             }
+//           }
+//
+//           return ListView(
+//             reverse: true,
+//             padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+//             children: allMessages,
+//           );
+//         },
+//       ),
+//     );
+//   }
+// }
+//
+// class SubmissionsBubble extends StatefulWidget {
+//   final dynamic teacherId;
+//   final dynamic timeOfSubmit;
+//   final dynamic studentId;
+//   final String assId;
+//   final List<String>? files;
+//
+//   SubmissionsBubble({
+//     required this.teacherId,
+//     required this.timeOfSubmit,
+//     required this.studentId,
+//     this.files,
+//     required this.assId,
+//   });
+//
+//   @override
+//   State<SubmissionsBubble> createState() => _SubmissionsBubbleState();
+// }
+//
+// class _SubmissionsBubbleState extends State<SubmissionsBubble> {
+//   late Future<Student> _studentFuture;
+//   // late String assTitle;
+//
+//   @override
+//   void initState() {
+//     super.initState();
+//     // assTitle=AuthMethods().getAssignmentName(widget.assId) as String;
+//     _studentFuture = AuthMethods().getStudentInfo(widget.studentId);
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return FutureBuilder<Student>(
+//       future: _studentFuture,
+//       builder: (context, snapshot) {
+//         if (!snapshot.hasData) {
+//           return Padding(
+//             padding: EdgeInsets.all(10.0),
+//             child: Card(
+//               color: Color(0xFF9CDCFD),
+//               elevation: 5,
+//               child: Padding(
+//                 padding: EdgeInsets.all(10.0),
+//                 child: Column(
+//                   crossAxisAlignment: CrossAxisAlignment.start,
+//                   children: [
+//                     // Text('Assignment Title ${assTitle}'),
+//                     Text('Teacher ID: ${widget.teacherId}', style: TextStyle(fontWeight: FontWeight.bold)),
+//                     Text('Student ID: ${widget.studentId}'),
+//                     Text('Time of Submission: ${widget.timeOfSubmit.toDate()}'),
+//                     SizedBox(height: 10),
+//                     if (widget.files != null && widget.files!.isNotEmpty)
+//                       Text('Files:', style: TextStyle(fontWeight: FontWeight.bold)),
+//                     if (widget.files != null)
+//                       ...widget.files!.map((fileUrl) => Text(fileUrl)).toList(),
+//                     Center(child: CircularProgressIndicator()), // Show loading spinner
+//                   ],
+//                 ),
+//               ),
+//             ),
+//           );
+//         }
+//
+//         final student = snapshot.data!;
+//         final classInfo = '${student.branch} ${student.section} ${student.year}';
+//
+//         return Padding(
+//           padding: EdgeInsets.all(10.0),
+//           child: Card(
+//             color: Color(0xFF9CDCFD),
+//             elevation: 5,
+//             child: Padding(
+//               padding: EdgeInsets.all(10.0),
+//               child: Column(
+//                 crossAxisAlignment: CrossAxisAlignment.start,
+//                 children: [
+//                   Text('Student Name: ${student.name}'),
+//                   Text('Enroll: ${student.enroll}'),
+//                   Text('Class: $classInfo'),
+//                   Text('Time of Submission: ${widget.timeOfSubmit.toDate()}'),
+//                   SizedBox(height: 10),
+//                   if (widget.files != null && widget.files!.isNotEmpty)
+//                     Text('Files:', style: TextStyle(fontWeight: FontWeight.bold)),
+//                   if (widget.files != null)
+//                     ...widget.files!.map((fileUrl) => Text(fileUrl)).toList(),
+//                   SizedBox(height: 10),
+//                 ],
+//               ),
+//             ),
+//           ),
+//         );
+//       },
+//     );
+//   }
+// }

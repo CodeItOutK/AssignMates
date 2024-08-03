@@ -12,15 +12,3 @@ class Student{
 //edit-2
   late List<String>doneAssignments;
 }
-
-// class Student{
-//   // dynamic id;
-//   dynamic name;
-//   dynamic branch;//class
-//   dynamic enroll;
-//   dynamic email;
-//   dynamic password;
-//   dynamic accountCreated;
-//   dynamic year;//year
-//   dynamic section;//section
-// }

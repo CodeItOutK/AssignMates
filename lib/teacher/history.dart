@@ -1,9 +1,13 @@
 import 'package:assignmates/database/database.dart';
 import 'package:assignmates/teacher/teacheruploadpage.dart';
+import 'package:assignmates/teacher/viewSubmissions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:assignmates/utilities/timeLeft.dart';
+import 'defaulterStudents.dart';
+
+
 
 class History extends StatefulWidget {
   final String? name; //name of the teacher
@@ -43,11 +47,11 @@ class _HistoryState extends State<History> {
               },
               child: Container(
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.secondary,
+                  color: Theme.of(context).colorScheme.secondary.withOpacity(0.5),
                   borderRadius: BorderRadius.circular(30),
                   boxShadow: [
                     BoxShadow(
-                      color: Theme.of(context).colorScheme.secondary.withOpacity(0.5),
+                      color: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
                       spreadRadius: 3,
                       blurRadius: 5,
                       offset: Offset(0, 2), // changes position of shadow
@@ -65,7 +69,7 @@ class _HistoryState extends State<History> {
             "${widget.name}",
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
-          backgroundColor: Theme.of(context).colorScheme.primary,
+          backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.5),
         ),
         body: SingleChildScrollView(
           padding: EdgeInsets.all(16.0), // Add padding to the entire screen
@@ -99,15 +103,17 @@ class _HistoryState extends State<History> {
                   }
                   // All the list
                   final assignmentList = snapshot.data!.docs;
-                  List<MessageBubble> myAllAssignments = []; // My assignments (teacher's POV)
+                  List<AssignmentBubble> myAllAssignments = []; // My assignments (teacher's POV)
                   for (var msg in assignmentList) {
+                    final dynamic assignmentId=msg['id'];
                     final dynamic title = msg['title'] ?? '';
                     final dynamic teacher = widget.name ?? '';
                     final dynamic instructions = msg['instructions'] ?? '';
                     final dynamic deadline = msg['deadline'] ?? '';
                     final List<Map<String, dynamic>> classes = List<Map<String, dynamic>>.from(msg['classes']);
 
-                    MessageBubble _bubble = MessageBubble(
+                    AssignmentBubble _bubble = AssignmentBubble(
+                      assId:assignmentId,
                       title: title,
                       teacher: teacher,
                       instructions: instructions,
@@ -154,22 +160,6 @@ class _HistoryState extends State<History> {
                 ),
               ),
               SizedBox(height: 10),
-              Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    // Your onPressed code here
-                  },
-                  child: Text('View Submissions',style: TextStyle(color: Colors.white),),
-                  style: ElevatedButton.styleFrom(
-                    primary: Theme.of(context).colorScheme.secondary,
-                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
             ],
           ),
         ),
@@ -178,20 +168,21 @@ class _HistoryState extends State<History> {
   }
 }
 
-class MessageBubble extends StatefulWidget {
-  final dynamic title;
+class AssignmentBubble extends StatefulWidget {
+  final dynamic assId;//id
+  final dynamic title;//assignment-title
   final dynamic teacher;
   final dynamic instructions;
   final dynamic deadline;
   final List<Map<String, dynamic>> classes;
 
-  MessageBubble({this.title, this.teacher, this.instructions, this.deadline, required this.classes});
+  AssignmentBubble({this.assId,this.title, this.teacher, this.instructions, this.deadline, required this.classes});
 
   @override
-  State<MessageBubble> createState() => _MessageBubbleState();
+  State<AssignmentBubble> createState() => _AssignmentBubbleState();
 }
 
-class _MessageBubbleState extends State<MessageBubble> {
+class _AssignmentBubbleState extends State<AssignmentBubble> {
   List<String> _timeUntil=['loading..','loading..'];
 
   late Timer _timer;
@@ -237,34 +228,34 @@ class _MessageBubbleState extends State<MessageBubble> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                  padding: EdgeInsets.only(bottom: 4.0),
-                  child: Row(
-                    children: [
-                      Icon(Icons.view_timeline,color: Theme.of(context).colorScheme.primary),
-                      Text(
-                        'Title',
-                        style: TextStyle(
-                          color: Colors.brown,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          decoration: TextDecoration.underline,
-                          decorationColor: Colors.brown,
-                        ),
+                padding: EdgeInsets.only(bottom: 4.0),
+                child: Row(
+                  children: [
+                    Icon(Icons.view_timeline,color: Theme.of(context).colorScheme.primary),
+                    Text(
+                      'Title',
+                      style: TextStyle(
+                        color: Colors.brown,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.underline,
+                        decorationColor: Colors.brown,
                       ),
-                      Text(' : '),
-                      Text(
-                        '${widget.title}',
-                        style: TextStyle(
-                          color:Colors.blueAccent,
-                          // color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          decoration: TextDecoration.underline,
-                          decorationColor: Colors.blueAccent,
-                        ),
+                    ),
+                    Text(' : '),
+                    Text(
+                      '${widget.title}',
+                      style: TextStyle(
+                        color:Colors.blueAccent,
+                        // color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.underline,
+                        decorationColor: Colors.blueAccent,
                       ),
-                    ],
-                  )
+                    ),
+                  ],
+                )
               ),
               Padding(
                 padding: EdgeInsets.only(bottom: 4.0),
@@ -296,53 +287,94 @@ class _MessageBubbleState extends State<MessageBubble> {
               ),
 
               Padding(
-                  padding: EdgeInsets.only(bottom: 4.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(Icons.pending,color: Colors.red.withOpacity(0.7),),
-                      Text(
-                        'Deadline :  ',
+                padding: EdgeInsets.only(bottom: 4.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.pending,color: Colors.red.withOpacity(0.7),),
+                    Text(
+                      'Deadline :  ',
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 16,
+                      ),
+                    ),
+                    Flexible(
+                      child: Text(
+                        '${_timeUntil[0]}',
                         style: TextStyle(
                           color: Colors.red,
-                          fontSize: 16,
+                          fontSize: 13,
                         ),
                       ),
-                      Flexible(
-                        child: Text(
-                          '${_timeUntil[0]}',
-                          style: TextStyle(
-                            color: Colors.red,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
+                    ),
+                  ],
+                )
               ),
               Padding(
-                  padding: EdgeInsets.only(top: 4.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(Icons.groups,color: Colors.brown.withOpacity(0.7),),
-                      Text(
-                        'Allocated to Classes : ',
-                        style: TextStyle(
-                          color: Colors.brown,
-                          fontSize: 14,
-                        ),
+                padding: EdgeInsets.only(top: 4.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.groups,color: Colors.brown.withOpacity(0.7),),
+                    Text(
+                      'Allocated to Classes : ',
+                      style: TextStyle(
+                        color: Colors.brown,
+                        fontSize: 14,
                       ),
-                      Text(
-                        '$students',
-                        style: TextStyle(
-                          color: Colors.blueAccent,
-                          fontSize: 14,
-                        ),
+                    ),
+                    Text(
+                      '$students',
+                      style: TextStyle(
+                        color: Colors.blueAccent,
+                        fontSize: 14,
                       ),
-                    ],
-                  )
+                    ),
+                  ],
+                )
               ),
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    // Your onPressed code here
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ViewSubmissions(assignId: widget.assId,title: widget.title,)),
+                    );
+                  },
+                  child: Text('       View \n Submissions',style: TextStyle(color: Colors.white),),
+                  style: ElevatedButton.styleFrom(
+                    primary: Color(0xFF21C799),
+                    padding: EdgeInsets.symmetric(horizontal: 12, ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    textStyle: TextStyle(fontSize: 14, color: Colors.brown,fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: (){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) =>DefaultersScreen(assId:widget.assId)),
+                  );
+                },
+                child: Center(
+                  child:Visibility(
+                    visible: _timeUntil[0]=='Blocked Assignment'?true:false, // Set to false to hide the widget
+                    child: Row(
+                      children: [
+                        Icon(Icons.privacy_tip_outlined,color: Colors.red,),
+                        SizedBox(width: 5,),
+                        Text('View defaulter Students',style: TextStyle(color: Colors.red,decorationColor: Colors.red,decoration: TextDecoration.underline),),
+                      ],
+                    ),
+                  ),
+
+                ),
+              )
             ],
           ),
         ),
@@ -599,220 +631,3 @@ class _MessageBubbleState extends State<MessageBubble> {
 //     );
 //   }
 // }
-
-// import 'package:assignmates/database/database.dart';
-// import 'package:assignmates/pages/teacheruploadpage.dart';
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:flutter/material.dart';
-//
-// class History extends StatefulWidget {
-//   final String? name; //name of the teacher
-//   final String? id;
-//
-//   const History({
-//     Key? key,
-//     required this.name,
-//     required this.id,
-//   }) : super(key: key);
-//
-//   @override
-//   _HistoryState createState() => _HistoryState();
-// }
-//
-// class _HistoryState extends State<History> {
-//   late Stream<QuerySnapshot> _stream ;
-//   final String _currentUserName = "currentUserName"; // Replace with actual current user name
-//
-//   @override
-//   void initState() {
-//     _stream=AuthMethods().getAssignmentStream();
-//     // TODO: implement initState
-//     super.initState();
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       debugShowCheckedModeBanner: false,
-//       home: Scaffold(
-//         appBar: AppBar(
-//           title: Text("Teacher ${widget.name} 's dashboard", style: TextStyle(color: Colors.white)),
-//           backgroundColor: Theme.of(context).colorScheme.secondary,
-//           leading: IconButton(
-//             icon: Icon(Icons.arrow_back_ios, color: Colors.white),
-//             onPressed: () => Navigator.of(context).pop(),
-//           ),
-//         ),
-//         body: SingleChildScrollView(
-//           child: Column(
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             children: [
-//               StreamBuilder<QuerySnapshot>(
-//                 stream: _stream,//stream of all the assign-ments
-//                 builder: (context, snapshot) {
-//                   if (!snapshot.hasData) {
-//                     return Center(
-//                       child: CircularProgressIndicator(
-//                         backgroundColor: Color(0xFF679289),
-//                       ),
-//                     );
-//                   }
-//                   //all the list
-//                   final assignmentList = snapshot.data!.docs;
-//                   List<MessageBubble> myAllAssignments = [];//my -assignments(teachers pov)
-//                   for (var msg in assignmentList) {//match is currentUsers id matches with db's teacherId
-//                     final dynamic title=msg['title']??'';
-//                     final dynamic teacher=widget.name??'';
-//                     final dynamic instructions=msg['instructions']??'';
-//                     final dynamic deadline=msg['deadline']??'';
-//                     final List<Map<String, dynamic>> classes = List<Map<String, dynamic>>.from(msg['classes']);
-//
-//                     MessageBubble _bubble = MessageBubble(
-//                       title: title,
-//                       teacher: teacher,
-//                       instructions: instructions, // Replace with actual data
-//                       deadline: deadline,
-//                       classes: classes, // Replace with actual data
-//                     );
-//                     // myAllAssignments.add(_bubble);
-//                     if (msg['teacherId']==widget.id){
-//                       myAllAssignments.add(_bubble);
-//                     }
-//                   }
-//                   if(myAllAssignments.isEmpty){
-//                     return Text('Assignments DNE');
-//                   }
-//                   return ListView(
-//                     shrinkWrap: true,
-//                     reverse: true,
-//                     padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-//                     children: myAllAssignments,
-//                   );
-//                 },
-//               ),
-//               SizedBox(height: 20),
-//               Center(
-//                 child: ElevatedButton(
-//                   onPressed: () {
-//                     Navigator.push(
-//                       context,
-//                       MaterialPageRoute(builder: (context) => TeacherUploadPage(id: widget.id!)),
-//                     );
-//                   },
-//                   child: Text('Allocate assignments'),
-//                   style: ButtonStyle(
-//                     backgroundColor: MaterialStateProperty.all<Color>(Color(0xFF02C798),),
-//                     foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
-//                     padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.symmetric(horizontal: 24, vertical: 12)),
-//                     shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-//                       RoundedRectangleBorder(
-//                         borderRadius: BorderRadius.circular(30),
-//                       ),
-//                     ),
-//                   ),
-//                 ),
-//               ),
-//               SizedBox(height: 20),
-//               Center(
-//                 child: ElevatedButton(
-//                   onPressed: () {
-//                     // Your onPressed code here
-//                   },
-//                   child: Text('View Submissions'),
-//                   style: ButtonStyle(
-//                     backgroundColor: MaterialStateProperty.all<Color>(Color(0xFF02C798),),
-//                     foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
-//                     padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.symmetric(horizontal: 24, vertical: 12)),
-//                     shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-//                       RoundedRectangleBorder(
-//                         borderRadius: BorderRadius.circular(30),
-//                       ),
-//                     ),
-//                   ),
-//                 ),
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
-//
-// class MessageBubble extends StatelessWidget {
-//   final dynamic title;
-//   final dynamic teacher;
-//   final dynamic instructions;
-//   final dynamic deadline;
-//   final List<Map<String,dynamic>> classes;
-//
-//   MessageBubble({this.title, this.teacher, this.instructions, this.deadline, required this.classes});
-//   // MessageBubble({this.title,this.teacher, this.instructions, this.deadline, });
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     String students = "";
-//     for (var v in classes) {
-//       students += "${v['branch']} ${v['section']} ${v['year']} \n";
-//     }
-//     return Padding(
-//       padding: EdgeInsets.all(10.0),
-//       child: Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: <Widget>[
-//           Material(
-//             elevation: 5.0,
-//             borderRadius: BorderRadius.all(
-//               Radius.circular(20),
-//             ),
-//             color: Color(0xFF5366FF),
-//             child: Container(
-//               margin: EdgeInsets.all(10),
-//               child: Column(
-//                 crossAxisAlignment: CrossAxisAlignment.start,
-//                 children: [
-//                   Padding(
-//                     padding: EdgeInsets.all(5),
-//                     child: Text(
-//                       'Title-$title',
-//                       style: TextStyle(
-//                         color: Colors.white,
-//                         fontSize: 20,
-//                       ),
-//                     ),
-//                   ),
-//                   Padding(
-//                     padding: EdgeInsets.all(5),
-//                     child: Text(
-//                       'Instructions-$instructions',
-//                       style: TextStyle(
-//                         color: Colors.white,
-//                         fontSize: 20,
-//                       ),
-//                     ),
-//                   ),
-//                   Padding(
-//                     padding: EdgeInsets.all(5),
-//                     child: Text(
-//                       'Deadline-$deadline',
-//                       style: TextStyle(
-//                         color: Colors.white,
-//                         fontSize: 20,
-//                       ),
-//                     ),
-//                   ),
-//                   Padding(
-//                     padding: EdgeInsets.symmetric(horizontal: 10),
-//                     child: Text('Allocated to Classes $students', style: TextStyle(color: Colors.white, fontSize: 10)),
-//                   ),
-//                 ],
-//               ),
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
-//
-//
