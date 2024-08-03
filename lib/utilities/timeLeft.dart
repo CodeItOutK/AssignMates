@@ -3,6 +3,7 @@ class OurTimeLeft {
     // Convert the input time to Indian Standard Time (UTC +5:30)
     DateTime istTime = time.toLocal().add(Duration(hours: 5, minutes: 30));
 
+    // DateTime istTime=time.toLocal().toLocaleString("en-US", {timeZone: "Asia/Kolkata"})
     List<String> retVal = [];
     // Calculate remaining time from the adjusted IST time
     Duration _timeUntilDue = istTime.difference(DateTime.now());
