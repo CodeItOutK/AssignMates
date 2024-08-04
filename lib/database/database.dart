@@ -466,6 +466,19 @@ class AuthMethods {
 //   }
 //
 // }
-
+  Future<List<String>> getAllTeachersForAStudent(String branch,String section,String year) async{
+    Set<String>allTeachersId={};
+    QuerySnapshot _allAssIds=await _firestore.collection('assignments').get();
+    for (var v in _allAssIds.docs){
+      // List<Map<String,dynamic>>allClasses=v['classes'];
+      List<dynamic> allClasses = v['classes'] as List<dynamic>;
+      for(var c in allClasses){
+        if(c['branch']==branch && c['section']==section && c['year']==year){
+          allTeachersId.add(v['teacherId']);
+        }
+      }
+    }
+    return allTeachersId.toList();
+  }
 
 }
