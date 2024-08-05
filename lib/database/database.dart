@@ -481,4 +481,53 @@ class AuthMethods {
     return allTeachersId.toList();
   }
 
+  getChatStreamForStudents(String teacherId,String studentId){
+    return _firestore.collection('chat').doc(teacherId+' '+studentId).collection('messages').orderBy('time',descending: true).snapshots();
+  }
+
+  getChatModel(String teacherId)async{
+    List<String>docIds=[];
+    QuerySnapshot _qs=await _firestore.collection('chat').get();
+    for (var v in _qs.docs){
+      if(v['teacherId']==teacherId && v['studentSideNewMessage']==true){
+        docIds.add(v.id);
+      }
+    }
+    return docIds;
+  }
+
+  getStudentsModelsFromChatIds(List<String>docIds)async{
+    List<Student>studentModel=[];
+    for(var id in docIds){
+      DocumentSnapshot _ds=await _firestore.collection('chat').doc(id).get();
+      studentModel.add(await getStudentInfo(_ds['studentId']));
+    }
+    return studentModel;
+  }
+
+  getStudentIdsFromChatIds(List<String>docIds)async{
+    List<String>studentIds=[];
+    for(var id in docIds){
+      DocumentSnapshot _ds=await _firestore.collection('chat').doc(id).get();
+      studentIds.add(_ds['studentId']);
+    }
+    return studentIds;
+  }
+
+  // seenStatusForRecentMessage(String teacherId,String studentId)async{
+  //   bool isSeen=false;
+  //   DocumentSnapshot _docSnap=await _firestore.collection('chat').doc(teacherId+' '+studentId).get();
+  //   if(_docSnap['studentSideNewMessage']==true){
+  //     isSeen=false;//show gradient border
+  //   }else{
+  //     isSeen=true;//show grey border
+  //   }
+  //   return isSeen;
+  // }
+  // flipSeenStatus(String teacherId,String studentId)async{
+  //   await _firestore.collection('chat').doc(teacherId+' '+studentId).set({
+  //     'studentSideNewMessage':false,
+  //   });
+  // }
+
 }

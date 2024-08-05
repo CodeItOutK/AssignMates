@@ -1,9 +1,10 @@
+import 'package:assignmates/theme.dart';
 import 'package:flutter/material.dart';
 
 void showCustomSnackbar(BuildContext context,String message) {
   final snackBar = SnackBar(
     content: Text(message),
-    backgroundColor: Color(0xFF1EC99B), // Custom background color
+    backgroundColor: pblue, // Custom background color
     duration: Duration(seconds: 3), // Duration the Snackbar is visible
     action: SnackBarAction(
       label: '👀', // Label for the action button
