@@ -358,7 +358,7 @@ class _AssignmentBubbleState extends State<AssignmentBubble> {
                 onTap: (){
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) =>DefaultersScreen(assId:widget.assId)),
+                    MaterialPageRoute(builder: (context) =>DefaultersScreen(assId: widget.assId,)),
                   );
                 },
                 child: Center(

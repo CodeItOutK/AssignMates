@@ -498,6 +498,7 @@ class _TeacherUploadPageState extends State<TeacherUploadPage> {
                     if (_formKey.currentState!.validate()) {
                       _uploadAssignment();
                     }
+                    Navigator.pop(context);
                   },
                   child: Text('Submit'),
                 ),
