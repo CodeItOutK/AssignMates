@@ -1,3 +1,4 @@
+
 import 'package:assignmates/database/database.dart';
 import 'package:assignmates/utilities/showSnackbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -32,10 +33,10 @@ class _ChatScreenState extends State<ChatScreen> {
   TextEditingController messageController=new TextEditingController();//for clearing the message
   FirebaseFirestore _firestore=FirebaseFirestore.instance;
   dynamic _stream;
-  dynamic _currentUserName;
+  // dynamic _currentUserName;
   bool _loading=true;
   @override
-  bool studentSideNewMessage = false;
+  // bool studentSideNewMessage = false;
 
   void getDetails() async{
     _stream=AuthMethods().getChatStreamForStudents(widget.teacherId, widget.studentId);
@@ -50,13 +51,9 @@ class _ChatScreenState extends State<ChatScreen> {
     });
     // studentName.split(' ')[0];
   }
-
-  // Future<void> flipState()async{
-  //   if(isTeacherG==true){
-  //   //set not-seen status(studentSideNewMessage to false)
-  //     await AuthMethods().flipSeenStatus(widget.teacherId, widget.studentId);
-  //   }
-  // }
+  flipState()async{
+    await AuthMethods().flipSeenStatus(widget.teacherId, widget.studentId,isTeacherG);
+  }
   void initState() {
     // TODO: implement initState
     getDetails();//streams are a-synchronous
@@ -66,7 +63,7 @@ class _ChatScreenState extends State<ChatScreen> {
     if(widget.isTeacher){
       isTeacherG=true;
     }
-    // flipState();
+    if(widget.isTeacher==true)flipState();//seen status studentSideNewMessage set to false
     //if we are teacher,we have now seen all the messages of the current-student-teacher screen
     super.initState();
   }
@@ -208,12 +205,15 @@ class _ChatScreenState extends State<ChatScreen> {
                             if (messageController.text.isEmpty) {
                               showCustomSnackbar(context, 'Enter text to send !');
                             } else {
-                              _firestore.collection('chat').doc(widget.teacherId + ' ' + widget.studentId).set({
-                                'teacherId': widget.teacherId,
-                                'studentId': widget.studentId,
-                                //we have new-message from student-side to be shown at teacher-side
-                                if(isTeacherG==false)'studentSideNewMessage':true,
-                              });
+                              if(widget.isTeacher==false){
+                                _firestore.collection('chat').doc(widget.teacherId + ' ' + widget.studentId).set({
+                                  'teacherId': widget.teacherId,
+                                  'studentId': widget.studentId,
+                                  //we have new-message from student-side to be shown at teacher-side
+                                  'studentSideNewMessage':true,
+                                });
+                              }
+
                               _firestore.collection('chat').doc(widget.teacherId + ' ' + widget.studentId).collection('messages').add({
                                 'message': messageController.text,
                                 'time': Timestamp.now(),
