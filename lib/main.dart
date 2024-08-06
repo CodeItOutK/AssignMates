@@ -1,4 +1,5 @@
 import 'package:assignmates/pages/welcomescreen.dart';
+import 'package:assignmates/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:assignmates/firebase_options.dart';
@@ -21,7 +22,7 @@ class MyApp extends StatelessWidget {
       title: 'Assignmates',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSwatch().copyWith(
-          primary:Color(0xFF5366FF),
+          primary:pblue,
           // primary: const Color.fromARGB(255, 11, 74, 15),
           secondary: Color(0xFF02C798),
         ),

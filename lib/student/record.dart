@@ -11,6 +11,7 @@ import 'package:open_file/open_file.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:assignmates/utilities/timeLeft.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:assignmates/theme.dart';
 
 // For a particular student, maintain the record of completed tasks
 // and the tasks that need to be completed with their timelines being shown
@@ -41,7 +42,7 @@ class _StudentRecordsState extends State<StudentRecords> {
 
   List<ChatToTeacherBubble>_allTeachersChatBubble=[];
 
-  void initMethods()async{
+  Future<void> initMethods()async{
     // String currentUserId=AuthMethods().getCurrentUser();
     List<String>_allTeacherIds=await AuthMethods().getAllTeachersForAStudent
       ( widget.branch, widget.section, widget.year);
@@ -56,12 +57,17 @@ class _StudentRecordsState extends State<StudentRecords> {
     } else {
       print("No teachers found.");
     }
+    setState(() {
+
+    });
 
   }
 
   @override
   void initState() {
-    initMethods();
+    initMethods().then((_) {
+      setState(() {}); // Update state once all data is loaded
+    });
     super.initState();
     // Initialize the stream to get all assignments
     _stream = AuthMethods().getAssignmentStream();
@@ -72,7 +78,7 @@ class _StudentRecordsState extends State<StudentRecords> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: pblue,
         leading:
         Container(
           margin: EdgeInsets.all(10),
@@ -115,168 +121,115 @@ class _StudentRecordsState extends State<StudentRecords> {
         ),
       ),
 
-      body: ListView(
-        children: [
-          SizedBox(height: 15),
-          SizedBox(
-            height: 40, // Adjust the height as needed
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: _allTeachersChatBubble,
-            ),
-          ),
-          SizedBox(height: 15),
-          Row(
-            children: [
-              SizedBox(width: 25),
-              Icon(Icons.task, color: Colors.brown),
-              Text(
-                'Scheduled Tasks :',
-                style: TextStyle(
-                  color: Colors.brown,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  decoration: TextDecoration.underline,
-                  decorationColor: Colors.brown,
-                ),
-              ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              // Color(0xFFFEE9D0),
+              // Color(0xFFFFC371),
+              // Color(0xFFFFAA70),
+              // Color(0xFFFE936F),
+              // Color(0xFFFE7A6F),
+              // Color(0xFFBFEF98),
+
+              Color(0xFF6FD6FF),
+              Color(0xFF84DDE2),
+              Color(0xFF9DE5C3),
+              Color(0xFFAEEAAF),
+              Color(0xFFBFEF98),
             ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-          // SizedBox(height: 10),
-          StreamBuilder<QuerySnapshot>(
-            stream: _stream, // Stream of all the assignments
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return Center(
-                  child: CircularProgressIndicator(
-                    backgroundColor: Color(0xFF679289),
+        ),
+        child: ListView(
+          children: [
+            SizedBox(height: 15),
+            SizedBox(
+              height: 40, // Adjust the height as needed
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: _allTeachersChatBubble,
+              ),
+            ),
+            SizedBox(height: 15),
+            Row(
+              children: [
+                SizedBox(width: 25),
+                Icon(Icons.task, color: Colors.brown),
+                Text(
+                  'Scheduled Tasks :',
+                  style: TextStyle(
+                    color: Colors.brown,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    decoration: TextDecoration.underline,
+                    decorationColor: Colors.brown,
                   ),
-                );
-              }
+                ),
+              ],
+            ),
+            // SizedBox(height: 10),
+            StreamBuilder<QuerySnapshot>(
+              stream: _stream, // Stream of all the assignments
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return Center(
+                    child: CircularProgressIndicator(
+                      backgroundColor: Color(0xFF679289),
+                    ),
+                  );
+                }
 
-              List<AssignmentBubble> myAllAssignments = []; // Assignments (student's view)
-              final assignmentList = snapshot.data!.docs;
+                List<AssignmentBubble> myAllAssignments = []; // Assignments (student's view)
+                final assignmentList = snapshot.data!.docs;
 
-              for (var msg in assignmentList) {
-                final dynamic assId = msg['id'];
-                final String title = msg['title'];
-                final dynamic deadline = msg['deadline'];
-                final String instructions = msg['instructions'];
-                final String teacherId = msg['teacherId'];
-                final List<Map<String, dynamic>> classes = List<Map<String, dynamic>>.from(msg['classes']);
-                final List<String> fileUrls = List<String>.from(msg['fileUrls']);
+                for (var msg in assignmentList) {
+                  final dynamic assId = msg['id'];
+                  final String title = msg['title'];
+                  final dynamic deadline = msg['deadline'];
+                  final String instructions = msg['instructions'];
+                  final String teacherId = msg['teacherId'];
+                  final List<Map<String, dynamic>> classes = List<Map<String, dynamic>>.from(msg['classes']);
+                  final List<String> fileUrls = List<String>.from(msg['fileUrls']);
 
-                AssignmentBubble _bubble = AssignmentBubble(
-                  assId: assId,
-                  classes: classes,
-                  fileUrls: fileUrls,
-                  title: title,
-                  deadline: deadline,
-                  instructions: instructions,
-                  teacherId: teacherId,
-                );
+                  AssignmentBubble _bubble = AssignmentBubble(
+                    assId: assId,
+                    classes: classes,
+                    fileUrls: fileUrls,
+                    title: title,
+                    deadline: deadline,
+                    instructions: instructions,
+                    teacherId: teacherId,
+                  );
 
-                for (var v in classes) {
-                  if (v['branch'] == widget.branch && v['section'] == widget.section && v['year'] == widget.year) {
-                    myAllAssignments.add(_bubble);
+                  for (var v in classes) {
+                    if (v['branch'] == widget.branch && v['section'] == widget.section && v['year'] == widget.year) {
+                      myAllAssignments.add(_bubble);
+                    }
                   }
                 }
-              }
 
-              if (myAllAssignments.isEmpty) {
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text('No Assignments have been scheduled till date !!'),
+                if (myAllAssignments.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text('No Assignments have been scheduled till date !!'),
+                  );
+                }
+
+                return ListView(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+                  children: myAllAssignments,
                 );
-              }
-
-              return ListView(
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-                children: myAllAssignments,
-              );
-            },
-          ),
-        ],
+              },
+            ),
+          ],
+        ),
       ),
 
 
-
-      // body: ListView(
-      //     children:[ Column(
-      //       children: [
-      //         SizedBox(height: 15,),
-      //         ListView(
-      //           scrollDirection: Axis.horizontal,
-      //           children: _allTeachersChatBubble,
-      //         ),
-      //         SizedBox(height: 15,),
-      //         Row(
-      //           children: [
-      //             SizedBox(width: 25,),
-      //             Icon(Icons.task,color: Colors.brown,),
-      //             Text('Scheduled Tasks :',style: TextStyle(color: Colors.brown,fontSize: 20,fontWeight: FontWeight.bold,
-      //             decoration: TextDecoration.underline,decorationColor: Colors.brown),),
-      //           ],
-      //         ),
-      //         StreamBuilder<QuerySnapshot>(
-      //           stream: _stream, // Stream of all the assignments
-      //           builder: (context, snapshot) {
-      //             if (!snapshot.hasData) {
-      //               return Center(
-      //                 child: CircularProgressIndicator(
-      //                   backgroundColor: Color(0xFF679289),
-      //                 ),
-      //               );
-      //             }
-      //             List<AssignmentBubble> myAllAssignments = []; // Assignments (student's view)
-      //             // All the assignment list
-      //             final assignmentList = snapshot.data!.docs;
-      //
-      //             for (var msg in assignmentList) {
-      //               final dynamic assId=msg['id'];
-      //               final String title = msg['title'];
-      //               final dynamic deadline = msg['deadline'];
-      //               final String instructions = msg['instructions'];
-      //               final String teacherId = msg['teacherId'];
-      //               final List<Map<String, dynamic>> classes = List<Map<String, dynamic>>.from(msg['classes']);
-      //               final List<String> fileUrls = List<String>.from(msg['fileUrls']);
-      //
-      //               AssignmentBubble _bubble = AssignmentBubble(
-      //                 assId:assId,
-      //                 classes: classes,
-      //                 fileUrls: fileUrls,
-      //                 title: title,
-      //                 deadline: deadline,
-      //                 instructions: instructions,
-      //                 teacherId: teacherId,
-      //               );
-      //
-      //               for (var v in classes) {
-      //                 if (v['branch'] == widget.branch && v['section'] == widget.section && v['year'] == widget.year) {
-      //                   myAllAssignments.add(_bubble);
-      //                 }
-      //               }
-      //             }
-      //
-      //             if (myAllAssignments.isEmpty) {
-      //               return Text('No Assignments have been scheduled till date !!');
-      //             }
-      //
-      //             // return Text('${_allTeachersChatBubble.length}');
-      //             return ListView(
-      //               shrinkWrap: true,
-      //               reverse: true,
-      //               padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-      //               // children: _allTeachersChatBubble,
-      //               children: myAllAssignments,
-      //             );
-      //           },
-      //         ),
-      //       ],
-      //     ),]
-      // ),
     );
   }
 }
@@ -295,19 +248,6 @@ class _ChatToTeacherBubbleState extends State<ChatToTeacherBubble> {
   dynamic teacherName="";
   dynamic studentId="";
 
-  // initMethods() async {
-  //   // Fetch teacher information from AuthMethods
-  //   Teacher _teacherModel = await AuthMethods().getTeacherInfo(widget.teacherId);
-  //
-  //   // Format teacher's name by replacing spaces with newlines
-  //   String? formattedName = _teacherModel.name.replaceAll(' ', '\n');
-  //
-  //   // Update state with formatted teacher's name
-  //   teacherName=formattedName;
-  //   // setState(() {
-  //   //   teacherName = formattedName;
-  //   // });
-  // }
   initMethods() async {
     // Fetch teacher information from AuthMethods
     Teacher _teacherModel = await AuthMethods().getTeacherInfo(widget.teacherId);
@@ -337,7 +277,7 @@ class _ChatToTeacherBubbleState extends State<ChatToTeacherBubble> {
         // Handle tap event here
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => ChatScreen(teacherId: widget.teacherId,studentId: studentId,)),
+          MaterialPageRoute(builder: (context) => ChatScreen(teacherId: widget.teacherId,studentId: studentId,isTeacher:false)),
         );
 
         print("CircleAvatar tapped!");
@@ -356,7 +296,7 @@ class _ChatToTeacherBubbleState extends State<ChatToTeacherBubble> {
               // Colors.yellow,
               // Colors.green,
               // Colors.blue,
-              Colors.pink,
+              Colors.indigo,
               Colors.purple,
             ],
             stops: [0.1, 0.5, 0.9,  1.3],
@@ -364,7 +304,7 @@ class _ChatToTeacherBubbleState extends State<ChatToTeacherBubble> {
         ),
         child: CircleAvatar(
           radius: 30, // Adjust the size to fit the text
-          // backgroundColor: Colors.blueAccent.withOpacity(0.5),
+          backgroundColor:pblue,
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: FittedBox(
@@ -373,7 +313,7 @@ class _ChatToTeacherBubbleState extends State<ChatToTeacherBubble> {
                 teacherName,
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 16, // Adjust font size as needed
+                  fontSize: 18, // Adjust font size as needed
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -500,7 +440,7 @@ class _AssignmentBubbleState extends State<AssignmentBubble> {
         decoration: BoxDecoration(
           color: _timeUntil[0] == 'Blocked Assignment'
               ? Color(0xFFFFCDD2)
-              : Colors.white,
+              : peach,
           borderRadius: BorderRadius.circular(10),
           border: _timeUntil[0] == 'Blocked Assignment'
               ? Border.all(
@@ -654,7 +594,7 @@ class _AssignmentBubbleState extends State<AssignmentBubble> {
                   style: TextStyle(color: Colors.white, fontSize: 10),
                 ),
                 style: ElevatedButton.styleFrom(
-                  primary: Theme.of(context).colorScheme.secondary,
+                  primary:pblue.withOpacity(0.6),
                   padding: EdgeInsets.symmetric(horizontal: 8),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
