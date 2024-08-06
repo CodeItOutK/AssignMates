@@ -513,6 +513,7 @@ class AuthMethods {
     }
     return studentIds;
   }
+  //SEEN FUNC FROM TEACHER-SIDE
   //false->grey border
   seenStatusForRecentMessage(String teacherId,String studentId)async{
     bool isSeen=false;//show color
@@ -525,13 +526,35 @@ class AuthMethods {
     return isSeen;
   }
   flipSeenStatus(String teacherId,String studentId,bool isTeacher)async{
-
+      //and dont change the value of teacherSideNewMessage
+    if(isTeacher){
+      dynamic pvsValTeacherSideNewMessage=await getExistingValueOfTeacherSideNewMessage(teacherId, studentId);
       await _firestore.collection('chat').doc(teacherId+' '+studentId).set({
         'studentId':studentId,
         'teacherId':teacherId,
         'studentSideNewMessage':false,
+        'teacherSideNewMessage':pvsValTeacherSideNewMessage,
       });
+    }else{
+      //student ne teacher side ka new message dekh liya h
+      dynamic pvsValStudentSideNewMessage=await getExistingValueOfStudentSideNewMessage(teacherId, studentId);
+      await _firestore.collection('chat').doc(teacherId+' '+studentId).set({
+        'studentId':studentId,
+        'teacherId':teacherId,
+        'studentSideNewMessage':pvsValStudentSideNewMessage,
+        'teacherSideNewMessage':false,
+      });
+    }
 
+
+  }
+  getExistingValueOfTeacherSideNewMessage(String teacherId,String studentId)async{
+    DocumentSnapshot<Map<String, dynamic>>docSnap=await _firestore.collection('chat').doc(teacherId+' '+studentId).get();
+    return docSnap['teacherSideNewMessage'];
+  }
+  getExistingValueOfStudentSideNewMessage(String teacherId,String studentId)async{
+    DocumentSnapshot<Map<String, dynamic>>docSnap=await _firestore.collection('chat').doc(teacherId+' '+studentId).get();
+    return docSnap['studentSideNewMessage'];
   }
 
 }
