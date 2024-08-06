@@ -37,15 +37,25 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _loading=true;
   @override
   // bool studentSideNewMessage = false;
+  dynamic valOfTeacherSideNewMsg;//existing value
+  dynamic valOfStudentSideNewMsg;
 
   void getDetails() async{
     _stream=AuthMethods().getChatStreamForStudents(widget.teacherId, widget.studentId);
     // _stream=OurDatabase().getMessageStream(widget.grpId);
     Student _student=await AuthMethods().getStudentInfo(widget.studentId);
-    studentName=_student.name;
+    setState(() {
+      studentName=_student.name;
+    });
 
     Teacher _teacher=await AuthMethods().getTeacherInfo(widget.teacherId);
-    teacherName=_teacher.name;
+    setState(() {
+      teacherName=_teacher.name;
+    });
+
+    valOfTeacherSideNewMsg=await AuthMethods().getExistingValueOfTeacherSideNewMessage(widget.teacherId,widget.studentId);
+    valOfStudentSideNewMsg=await AuthMethods().getExistingValueOfStudentSideNewMessage(widget.teacherId,widget.studentId);
+
     setState(() {
 
     });
@@ -63,7 +73,8 @@ class _ChatScreenState extends State<ChatScreen> {
     if(widget.isTeacher){
       isTeacherG=true;
     }
-    if(widget.isTeacher==true)flipState();//seen status studentSideNewMessage set to false
+    flipState();//seen status studentSideNewMessage set to false
+    //seen status from student side of teacherSideNewMessage set to false
     //if we are teacher,we have now seen all the messages of the current-student-teacher screen
     super.initState();
   }
@@ -206,11 +217,22 @@ class _ChatScreenState extends State<ChatScreen> {
                               showCustomSnackbar(context, 'Enter text to send !');
                             } else {
                               if(widget.isTeacher==false){
+                                //and dont change the value of teacherSideNewMessage
+
                                 _firestore.collection('chat').doc(widget.teacherId + ' ' + widget.studentId).set({
                                   'teacherId': widget.teacherId,
                                   'studentId': widget.studentId,
                                   //we have new-message from student-side to be shown at teacher-side
                                   'studentSideNewMessage':true,
+                                  'teacherSideNewMessage':false,
+                                });
+                              }else{
+                                _firestore.collection('chat').doc(widget.teacherId + ' ' + widget.studentId).set({
+                                  'teacherId': widget.teacherId,
+                                  'studentId': widget.studentId,
+                                  //we have new-message from student-side to be shown at teacher-side
+                                  'studentSideNewMessage':false,
+                                  'teacherSideNewMessage':true,
                                 });
                               }
 
