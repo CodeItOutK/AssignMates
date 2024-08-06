@@ -1,4 +1,5 @@
 import 'package:assignmates/database/database.dart';
+import 'package:assignmates/utilities/showSnackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:assignmates/teacher/history.dart';
 
@@ -60,12 +61,17 @@ class TeacherSignupScreen extends StatelessWidget {
               ElevatedButton(
                 onPressed: () async {
                   // login teacher
+                  if(email.text==''){
+                    showCustomSnackbar(context, 'you message');
+                  }
+                  else{
                   var retVal=await AuthMethods().signUpTeacher(email.text, password.text,name.text!);
                   if(retVal.id.toString().length!=0){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => History(name: name.text,id:retVal.id)),
-                    );
+                  Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => History(name: name.text,id:retVal.id)),
+                  );
+                  }
                   }
                 },
                 child: const Text('Sign In'),

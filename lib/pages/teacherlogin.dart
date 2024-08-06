@@ -1,4 +1,5 @@
 import 'package:assignmates/models/teacher.dart';
+import 'package:assignmates/utilities/showSnackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:assignmates/teacher/history.dart';
 import 'teachersignup.dart';
@@ -54,15 +55,19 @@ class TeacherLoginScreen extends StatelessWidget {
                 onPressed: () async {
                   // login teacher
                   Teacher? retVal=await AuthMethods().loginTeacher(email.text, password.text);
-                  var _id=retVal!.id;
-                  print('id---->>>>>');
-                  print(_id);
-                  //get name of the teacher
-                  if(retVal!.name!=''){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => History(name: retVal!.name,id:_id)),
-                    );
+                  if(retVal==null){
+                    showCustomSnackbar(context, 'Wrong Credentials');
+                  }else{
+                    var _id=retVal!.id;
+                    print('id---->>>>>');
+                    print(_id);
+                    //get name of the teacher
+                    if(retVal!.name!=''){
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => History(name: retVal!.name,id:_id)),
+                      );
+                    }
                   }
                 },
                 child: const Text('Log In'),
