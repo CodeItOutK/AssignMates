@@ -233,7 +233,7 @@ class _StudentRecordsState extends State<StudentRecords> {
     );
   }
 }
-
+//.............................................CCCHHAAATTT-BUBBLEEE................................................
 class ChatToTeacherBubble extends StatefulWidget {
   final String teacherId;
 
@@ -247,6 +247,7 @@ class _ChatToTeacherBubbleState extends State<ChatToTeacherBubble> {
 
   dynamic teacherName="";
   dynamic studentId="";
+  dynamic isPink=false;
 
   initMethods() async {
     // Fetch teacher information from AuthMethods
@@ -259,6 +260,11 @@ class _ChatToTeacherBubbleState extends State<ChatToTeacherBubble> {
     // Update state with formatted teacher's name
     setState(() {
       teacherName = formattedName;
+    });
+    //call after we have both teacherId and studentId accessed !!!
+    isPink=await AuthMethods().getExistingValueOfTeacherSideNewMessage(widget.teacherId, studentId);
+    setState(() {
+
     });
   }
 
@@ -283,24 +289,25 @@ class _ChatToTeacherBubbleState extends State<ChatToTeacherBubble> {
         print("CircleAvatar tapped!");
       },
       child: Container(
+        // width: 100,height: 100,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(
             width: 2,
-            color: Colors.transparent, // Transparent color to allow gradient border
+            color: isPink?Colors.pink:Colors.grey, // Transparent color to allow gradient border
           ),
-          gradient: LinearGradient(
-            colors: [
-              Colors.red,
-              Colors.orange,
-              // Colors.yellow,
-              // Colors.green,
-              // Colors.blue,
-              Colors.indigo,
-              Colors.purple,
-            ],
-            stops: [0.1, 0.5, 0.9,  1.3],
-          ),
+          // gradient: LinearGradient(
+          //   colors: [
+          //     Colors.red,
+          //     Colors.orange,
+          //     // Colors.yellow,
+          //     // Colors.green,
+          //     // Colors.blue,
+          //     Colors.indigo,
+          //     Colors.purple,
+          //   ],
+          //   stops: [0.1, 0.5, 0.9,  1.3],
+          // ),
         ),
         child: CircleAvatar(
           radius: 30, // Adjust the size to fit the text
@@ -313,7 +320,7 @@ class _ChatToTeacherBubbleState extends State<ChatToTeacherBubble> {
                 teacherName,
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 18, // Adjust font size as needed
+                  fontSize: 30, // Adjust font size as needed
                   fontWeight: FontWeight.bold,
                 ),
               ),
