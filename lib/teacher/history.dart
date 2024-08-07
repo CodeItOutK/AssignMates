@@ -7,15 +7,14 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:assignmates/utilities/timeLeft.dart';
 import '../chat/chat.dart';
+import 'viewSubmissions.dart';
 import '../models/teacher.dart';
 import '../theme.dart';
 import 'defaulterStudents.dart';
 
-
-
 class History extends StatefulWidget {
   final String? name; //name of the teacher
-  final String? id;//id of teacher
+  final String? id; //id of teacher
 
   const History({
     Key? key,
@@ -29,15 +28,11 @@ class History extends StatefulWidget {
 
 class _HistoryState extends State<History> {
   late Stream<QuerySnapshot> _stream;
-  // final String _currentUserName = "currentUserName"; // Replace with actual current user name
 
   List<String> chatIds = []; // doc inside chat-collection
-
-// For only showing the students who messaged recently
-// messages->teacherId->map me jaake chack karo count->if exists->then show the teacher-bubble
   List<Student> newMessageStudentModels = [];
   List<ChatToStudentBubble> allChatBubbles = []; // Contains that circle-widget on the top
-  List<String>newMessageStudentIds=[];
+  List<String> newMessageStudentIds = [];
 
   Future<void> initMethods() async {
     // Fetch chatIds associated with the widget's id
@@ -53,11 +48,11 @@ class _HistoryState extends State<History> {
       for (int i = 0; i < n; i++) {
         // Create and add ChatToStudentBubble with both studentId and studentModel
         allChatBubbles.add(
-            ChatToStudentBubble(
-              studentId: newMessageStudentIds[i],
-              studentModel: newMessageStudentModels[i],
-              teacherId: widget.id!,
-            )
+          ChatToStudentBubble(
+            studentId: newMessageStudentIds[i],
+            studentModel: newMessageStudentModels[i],
+            teacherId: widget.id!,
+          ),
         );
       }
     }
@@ -71,7 +66,6 @@ class _HistoryState extends State<History> {
       setState(() {}); // Update state once all data is loaded
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -212,44 +206,38 @@ class _HistoryState extends State<History> {
             ),
           ],
         ),
-        // body:ListView(
-        //   scrollDirection: Axis.horizontal,
-        //   children: allChatBubbles,
-        // ),
       ),
     );
   }
 }
 
 class AssignmentBubble extends StatefulWidget {
-  final dynamic assId;//id
-  final dynamic title;//assignment-title
+  final dynamic assId; //id
+  final dynamic title; //assignment-title
   final dynamic teacher;
   final dynamic instructions;
   final dynamic deadline;
   final List<Map<String, dynamic>> classes;
 
-  AssignmentBubble({this.assId,this.title, this.teacher, this.instructions, this.deadline, required this.classes});
+  AssignmentBubble({this.assId, this.title, this.teacher, this.instructions, this.deadline, required this.classes});
 
   @override
   State<AssignmentBubble> createState() => _AssignmentBubbleState();
 }
 
 class _AssignmentBubbleState extends State<AssignmentBubble> {
-  List<String> _timeUntil=['loading..','loading..'];
-
+  List<String> _timeUntil = ['loading..', 'loading..'];
   late Timer _timer;
 
-  void _startTimer(var timeStamp){
-    _timer=Timer.periodic(Duration(seconds: 1), (timer) {
-      //called after every 1 sec take diffrence from the current-time every one second
-      _timeUntil=OurTimeLeft().timeLeft(timeStamp.toDate());
+  void _startTimer(var timeStamp) {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      //called after every 1 sec take difference from the current-time every one second
+      _timeUntil = OurTimeLeft().timeLeft(timeStamp.toDate());
       setState(() {
         //alert box is being shown just once after timer[0]'s value becomes {}
         if (_timeUntil[0] == "REPLACE CURRENT BOOK from below ↓↓↓↓") {
-          //daedline exceeded
+          //deadline exceeded
         }
-
       });
     });
   }
@@ -257,7 +245,6 @@ class _AssignmentBubbleState extends State<AssignmentBubble> {
   @override
   void initState() {
     _startTimer(widget.deadline);
-    // TODO: implement initState
     super.initState();
   }
 
@@ -435,7 +422,6 @@ class _AssignmentBubbleState extends State<AssignmentBubble> {
     );
   }
 }
-
 class ChatToStudentBubble extends StatefulWidget {
   Student studentModel;
   String studentId;
@@ -449,34 +435,23 @@ class ChatToStudentBubble extends StatefulWidget {
 }
 
 class _ChatToStudentBubbleState extends State<ChatToStudentBubble> {
-  //
-  // dynamic teacherName="";
-  // dynamic studentId="";
-  dynamic studentName="";
-  // bool seenMessage=true;
-
-  initMethods() async {
-    // Fetch teacher information from AuthMethods
-    // Teacher _teacherModel = await AuthMethods().getTeacherInfo(widget.teacherId);
-
-    // Format teacher's name by replacing spaces with newlines
-    // seenMessage=await AuthMethods().seenStatusForRecentMessage(widget.teacherId, widget.studentId);
-    studentName=widget.studentModel.name;
-
-    String formattedName = studentName?.replaceAll(' ', '\n') ?? '';
-    // studentId=await AuthMethods().getCurrentUser();
-    // Update state with formatted teacher's name
-    setState(() {
-      studentName = formattedName;
-    });
-  }
-
+  dynamic studentName = "";
+  bool colorPink=false;
 
   @override
   void initState() {
-    if(studentName=="")initMethods();// bug-fixed !!!
-    // TODO: implement initState
     super.initState();
+    initMethods();
+  }
+
+  Future<void> initMethods() async {
+    colorPink=await AuthMethods().seenStatusForRecentMessage(widget.teacherId,widget.studentId);
+    studentName = widget.studentModel.name;
+
+    setState(() {
+      // Format student's name by replacing spaces with newlines
+      studentName = studentName?.replaceAll(' ', '\n') ?? '';
+    });
   }
 
   @override
@@ -485,36 +460,34 @@ class _ChatToStudentBubbleState extends State<ChatToStudentBubble> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => ChatScreen(teacherId: widget.teacherId,studentId: widget.studentId,isTeacher:true)),
+          MaterialPageRoute(
+            builder: (context) => ChatScreen(
+              teacherId: widget.teacherId,
+              studentId: widget.studentId,
+              isTeacher: true,
+            ),
+          ),
         );
 
-        print("CircleAvatar tapped!");
+        //on coming back
+        setState(() {
+          colorPink = false;
+        });
       },
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Container(
           decoration: BoxDecoration(
             shape: BoxShape.circle,
+            color: colorPink? Colors.pinkAccent : Colors.grey,
             border: Border.all(
               width: 2,
-              color: Colors.transparent, // Transparent color to allow gradient border
-            ),
-            gradient: LinearGradient(
-              colors: [
-                Colors.red,
-                Colors.orange,
-                // Colors.yellow,
-                // Colors.green,
-                // Colors.blue,
-                Colors.indigo,
-                Colors.purple,
-              ],
-              stops: [0.1, 0.5, 0.9,  1.3],
+              color: Colors.transparent, // Transparent color for gradient effect
             ),
           ),
           child: CircleAvatar(
             radius: 35, // Adjust the size to fit the text
-            backgroundColor:pblue,
+            backgroundColor: pblue,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: FittedBox(
@@ -534,5 +507,5 @@ class _ChatToStudentBubbleState extends State<ChatToStudentBubble> {
       ),
     );
   }
-
 }
+
