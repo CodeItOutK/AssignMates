@@ -7,17 +7,17 @@ class OurTimeLeft {
 
     // Calculate remaining time
     Duration _timeUntilDue = time.difference(nowIST);
+    int _daysUntil = _timeUntilDue.inDays;
+    int _hoursUntil = _timeUntilDue.inHours.remainder(24);
+    int _minUntil = _timeUntilDue.inMinutes.remainder(60);
+    int _secUntil = _timeUntilDue.inSeconds.remainder(60);
 
-    if (_timeUntilDue.isNegative || _timeUntilDue.inSeconds <= 0) {
+    if (_secUntil<0) {
       // The duration is zero or negative
       retVal.add("Blocked Assignment");
       return retVal;
     }
 
-    int _daysUntil = _timeUntilDue.inDays;
-    int _hoursUntil = _timeUntilDue.inHours.remainder(24);
-    int _minUntil = _timeUntilDue.inMinutes.remainder(60);
-    int _secUntil = _timeUntilDue.inSeconds.remainder(60);
 
     if (_daysUntil > 0) {
       retVal.add('$_daysUntil days, $_hoursUntil hours, $_minUntil min, $_secUntil sec');

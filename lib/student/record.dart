@@ -153,6 +153,14 @@ class _StudentRecordsState extends State<StudentRecords> {
         child: ListView(
           padding: EdgeInsets.all(16.0),
           children: [
+            //enhancement
+            Row(
+              children: [
+                Icon(Icons.help_outline_rounded,color: pblue,),
+                Text('Doubt Support',style: TextStyle(color: pblue,fontWeight: FontWeight.bold,decorationColor: Colors.brown,decoration: TextDecoration.underline),),
+              ],
+            ),
+            SizedBox(height: 10,),
             FutureBuilder<List<ChatToTeacherBubble>>(
               future: getChatBubbles(),
               builder: (context, snapshot) {
@@ -181,11 +189,11 @@ class _StudentRecordsState extends State<StudentRecords> {
             Row(
               children: [
                 SizedBox(width: 25),
-                Icon(Icons.task, color: Colors.brown),
+                Icon(Icons.task, color: pblue),
                 Text(
-                  'Scheduled Tasks :',
+                  'Scheduled Tasks',
                   style: TextStyle(
-                    color: Colors.brown,
+                    color: pblue,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     decoration: TextDecoration.underline,
@@ -285,40 +293,43 @@ class _ChatToTeacherBubbleState extends State<ChatToTeacherBubble> {
 
         print("CircleAvatar tapped!");
       },
-      child: Container(
-        // width: 100,height: 100,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            width: 2,
-            color: isPink?Colors.pink:Colors.grey, // Transparent color to allow gradient border
+      child: SizedBox(
+        width: 50,height: 50,
+        child: Container(
+          // width: 100,height: 100,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              width: 2,
+              color: isPink?Colors.pink:Colors.grey, // Transparent color to allow gradient border
+            ),
+            // gradient: isPink?LinearGradient(
+            //   colors: [
+            //     Colors.red,
+            //     Colors.orange,
+            //     // Colors.yellow,
+            //     // Colors.green,
+            //     // Colors.blue,
+            //     Colors.indigo,
+            //     Colors.purple,
+            //   ],
+            //   stops: [0.1, 0.5, 0.9,  1.3],
+            // ),
           ),
-          // gradient: LinearGradient(
-          //   colors: [
-          //     Colors.red,
-          //     Colors.orange,
-          //     // Colors.yellow,
-          //     // Colors.green,
-          //     // Colors.blue,
-          //     Colors.indigo,
-          //     Colors.purple,
-          //   ],
-          //   stops: [0.1, 0.5, 0.9,  1.3],
-          // ),
-        ),
-        child: CircleAvatar(
-          radius: 30, // Adjust the size to fit the text
-          backgroundColor:pblue,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                teacherName,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 30, // Adjust font size as needed
-                  fontWeight: FontWeight.bold,
+          child: CircleAvatar(
+            radius: 30, // Adjust the size to fit the text
+            backgroundColor:pblue,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  teacherName,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 30, // Adjust font size as needed
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
@@ -440,12 +451,12 @@ class _AssignmentBubbleState extends State<AssignmentBubble> {
       visible: !isAssignmentSubmitted,
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 7, vertical: 6),
-        margin: EdgeInsets.symmetric(horizontal: 20, vertical: 7),
+        margin: EdgeInsets.symmetric(horizontal: 20, vertical: 13),
         decoration: BoxDecoration(
           color: _timeUntil[0] == 'Blocked Assignment'
               ? Color(0xFFFFCDD2)
               : peach,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(30),
           border: _timeUntil[0] == 'Blocked Assignment'
               ? Border.all(
             color: Colors.red,
@@ -455,12 +466,25 @@ class _AssignmentBubbleState extends State<AssignmentBubble> {
             color: Theme.of(context).colorScheme.primary,
             width: 2,
           ),
+          boxShadow: [
+            BoxShadow(
+              color: _timeUntil[0] == 'Blocked Assignment'
+                  ? Colors.red.withOpacity(0.5) // Shadow color with some opacity
+                  : Theme.of(context).colorScheme.primary.withOpacity(0.5),
+              spreadRadius: 2, // How much the shadow spreads
+              blurRadius: 5, // Softness of the shadow
+              offset: Offset(0, 3), // Position of the shadow
+            ),
+          ],
         ),
+
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            SizedBox(height: 5,),
             Row(
               children: [
+                Icon(Icons.tag_sharp,color: Colors.black,),
                 Text(
                   'Title:',
                   style: TextStyle(
@@ -485,6 +509,7 @@ class _AssignmentBubbleState extends State<AssignmentBubble> {
             SizedBox(height: 6),
             Row(
               children: [
+                Icon(Icons.create,color: Colors.red,),
                 Text(
                   'Deadline :',
                   style: TextStyle(
@@ -506,6 +531,7 @@ class _AssignmentBubbleState extends State<AssignmentBubble> {
             SizedBox(height: 6),
             Row(
               children: [
+                Icon(Icons.person,color: Colors.blueGrey,),
                 Text(
                   'Assigned By:',
                   style: TextStyle(
@@ -528,6 +554,7 @@ class _AssignmentBubbleState extends State<AssignmentBubble> {
             SizedBox(height: 6),
             Row(
               children: [
+                Icon(Icons.app_registration,color: Colors.blueGrey,),
                 Text(
                   'Instructions:',
                   style: TextStyle(
@@ -587,21 +614,30 @@ class _AssignmentBubbleState extends State<AssignmentBubble> {
                     if (files.isEmpty) {
                       showCustomSnackbar(context, 'Please Upload the file to proceed !');
                     } else {
+                      await AuthMethods().doneWithAnAssignment(widget.assId,widget.teacherId,files);
                       setState(() {
                         isAssignmentSubmitted = true;
                       });
                     }
                   }
                 },
-                child: Text(
-                  '     Submit \nAssignment',
-                  style: TextStyle(color: Colors.white, fontSize: 10),
+                child: Container(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.check_box_outlined,color: Colors.white,),
+                      Text(
+                        '     Submit \nAssignment',
+                        style: TextStyle(color: Colors.white, fontSize: 10),
+                      ),
+                    ],
+                  ),
                 ),
                 style: ElevatedButton.styleFrom(
                   primary:pblue.withOpacity(0.6),
                   padding: EdgeInsets.symmetric(horizontal: 8),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+                    borderRadius: BorderRadius.circular(20),
                   ),
                   textStyle: TextStyle(fontSize: 8, fontWeight: FontWeight.bold),
                 ),

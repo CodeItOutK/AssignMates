@@ -152,6 +152,7 @@
 //     }
 //   }
 import 'dart:io';
+import 'package:assignmates/theme.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -327,7 +328,10 @@ class _TeacherUploadPageState extends State<TeacherUploadPage> {
                 child: Icon(Icons.arrow_back_ios,color: Colors.brown,size: 20,)),),
           ),
         ),
-        title: Text('Upload Assignment',style: TextStyle(color: Colors.white),),backgroundColor: Theme.of(context).colorScheme.primary,),
+        title: Text('Upload Assignment',style: TextStyle(color: Colors.white),),
+        backgroundColor: pblue,
+        // backgroundColor: Theme.of(context).colorScheme.primary,
+      ),
       body: Form(
         key: _formKey,
         child: Padding(

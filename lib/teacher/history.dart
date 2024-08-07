@@ -78,11 +78,11 @@ class _HistoryState extends State<History> {
               },
               child: Container(
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.secondary.withOpacity(0.5),
+                  color: orange,
                   borderRadius: BorderRadius.circular(30),
                   boxShadow: [
                     BoxShadow(
-                      color: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
+                      color: orange.withOpacity(0.4),
                       spreadRadius: 3,
                       blurRadius: 5,
                       offset: Offset(0, 2), // Changes position of shadow
@@ -100,7 +100,8 @@ class _HistoryState extends State<History> {
             "${widget.name}",
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
-          backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+          backgroundColor:pblue,
+          // backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.5),
         ),
         body: FutureBuilder<void>(
           future: initMethods(),
@@ -114,31 +115,67 @@ class _HistoryState extends State<History> {
                 padding: EdgeInsets.all(16.0), // Add padding to the entire screen
                 children: [
                   Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      SizedBox(
-                        height: 100, // Adjust the height to fit the content of horizontal ListView
-                        child: ListView(
-                          scrollDirection: Axis.horizontal,
-                          children: allChatBubbles.toList(),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => TeacherUploadPage(id: widget.id!)),
+                          );
+                        },
+                        child: Column(
+                          children: [
+                            Icon(Icons.add_box_outlined,color: Colors.white,size: 30,),
+                            Text('Allocate New Assignment',style: TextStyle(color: Colors.white),),
+                          ],
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          primary: orange,
+                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                       ),
-                      SizedBox(height: 16), // Space between horizontal ListView and text
+                      SizedBox(height: 13,),
                       Row(
                         children: [
-                          Icon(Icons.task_outlined, color: Colors.brown, size: 24),
-                          SizedBox(width: 8),
+                          Icon(Icons.transcribe,color: pblue,size: 25,),
+                          SizedBox(width: 7,),
+                          Text('View Students Doubts',style: TextStyle(color: pblue,fontWeight: FontWeight.bold,fontSize: 18),),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 100, // Adjust the height to fit the content of horizontal ListView
+                        child: allChatBubbles.length>0?ListView(
+                          scrollDirection: Axis.horizontal,
+                          children: allChatBubbles.toList(),
+                        ):Column(
+                          children: [
+                            SizedBox(height: 30,),
+                            Text('All Queries Resolved ✅',style: TextStyle(color: orange,fontWeight: FontWeight.bold,fontSize: 20),),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 8), // Space between horizontal ListView and text
+                      // SizedBox(height: 10,),
+                      Row(
+                        children: [
+                          Icon(Icons.task_outlined, color: pblue, size: 24),
+                          SizedBox(width: 4),
                           Text(
                             'Scheduled Tasks',
                             style: TextStyle(
-                              color: Colors.brown,
+                              color: pblue,
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ],
                       ),
-                      SizedBox(height: 16), // Space between header and list
+                      SizedBox(height: 4), // Space between header and list
                       StreamBuilder<QuerySnapshot>(
                         stream: _stream, // Stream of all the assignments
                         builder: (context, snapshot) {
@@ -173,9 +210,23 @@ class _HistoryState extends State<History> {
                           }
                           if (myAllAssignments.isEmpty) {
                             return Center(
-                              child: Text(
-                                'No Assignments Found',
-                                style: TextStyle(color: Colors.brown, fontSize: 16),
+                              child: Column(
+                                children: [
+                                  SizedBox(height: 20,),
+                                  Text(
+                                    'No Recent Task',
+                                    style: TextStyle(color: orange, fontSize: 16,fontWeight: FontWeight.bold),
+                                  ),
+                                SizedBox(height: 10,),
+                                ClipOval(
+                                  child: Image.network(
+                                    'https://media.giphy.com/media/icPn4EwqNpAsZQmInZ/giphy.gif',
+                                    width: 200, // Adjust the size of the circle
+                                    height: 200, // Adjust the size of the circle
+                                    fit: BoxFit.cover, // Ensures the image covers the circle
+                                  ),
+                                ),
+                                ],
                               ),
                             );
                           }
@@ -187,25 +238,6 @@ class _HistoryState extends State<History> {
                         },
                       ),
                       SizedBox(height: 20),
-                      Center(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => TeacherUploadPage(id: widget.id!)),
-                            );
-                          },
-                          child: Text('Allocate Assignments', style: TextStyle(color: Colors.white)),
-                          style: ElevatedButton.styleFrom(
-                            primary: Theme.of(context).colorScheme.secondary,
-                            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ),
                       SizedBox(height: 10),
                     ],
                   ),
@@ -391,10 +423,13 @@ class _AssignmentBubbleState extends State<AssignmentBubble> {
                       context,
                       MaterialPageRoute(builder: (context) => ViewSubmissions(assignId: widget.assId,title: widget.title,)),
                     );
+                    setState(() {
+
+                    });
                   },
                   child: Text('       View \n Submissions',style: TextStyle(color: Colors.white),),
                   style: ElevatedButton.styleFrom(
-                    primary: Color(0xFF21C799),
+                    primary: orange,
                     padding: EdgeInsets.symmetric(horizontal: 12, ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
@@ -489,9 +524,9 @@ class _ChatToStudentBubbleState extends State<ChatToStudentBubble> {
         child: Container(
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: colorPink? Colors.pinkAccent : Colors.grey,
+            color: colorPink? Colors.orange : Colors.grey,
             border: Border.all(
-              width: 2,
+              width: 3,
               color: Colors.transparent, // Transparent color for gradient effect
             ),
           ),
