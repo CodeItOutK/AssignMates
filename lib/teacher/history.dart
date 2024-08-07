@@ -25,7 +25,7 @@ class History extends StatefulWidget {
   @override
   _HistoryState createState() => _HistoryState();
 }
-
+//use FutureBuilder insted of ListView
 class _HistoryState extends State<History> {
   late Stream<QuerySnapshot> _stream;
 
@@ -62,9 +62,6 @@ class _HistoryState extends State<History> {
   void initState() {
     super.initState();
     _stream = AuthMethods().getAssignmentStream();
-    initMethods().then((_) {
-      setState(() {}); // Update state once all data is loaded
-    });
   }
 
   @override
@@ -105,111 +102,311 @@ class _HistoryState extends State<History> {
           ),
           backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.5),
         ),
-        body: ListView(
-          padding: EdgeInsets.all(16.0), // Add padding to the entire screen
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height: 100, // Adjust the height to fit the content of horizontal ListView
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: allChatBubbles,
-                  ),
-                ),
-                SizedBox(height: 16), // Space between horizontal ListView and text
-                Row(
-                  children: [
-                    Icon(Icons.task_outlined, color: Colors.brown, size: 24),
-                    SizedBox(width: 8),
-                    Text(
-                      'Scheduled Tasks',
-                      style: TextStyle(
-                        color: Colors.brown,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 16), // Space between header and list
-                StreamBuilder<QuerySnapshot>(
-                  stream: _stream, // Stream of all the assignments
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return Center(
-                        child: CircularProgressIndicator(
-                          backgroundColor: Color(0xFF679289),
+        body: FutureBuilder<void>(
+          future: initMethods(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            } else {
+              return ListView(
+                padding: EdgeInsets.all(16.0), // Add padding to the entire screen
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        height: 100, // Adjust the height to fit the content of horizontal ListView
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
+                          children: allChatBubbles,
                         ),
-                      );
-                    }
-                    final assignmentList = snapshot.data!.docs;
-                    List<AssignmentBubble> myAllAssignments = []; // My assignments (teacher's POV)
-                    for (var msg in assignmentList) {
-                      final dynamic assignmentId = msg['id'];
-                      final dynamic title = msg['title'] ?? '';
-                      final dynamic teacher = widget.name ?? '';
-                      final dynamic instructions = msg['instructions'] ?? '';
-                      final dynamic deadline = msg['deadline'] ?? '';
-                      final List<Map<String, dynamic>> classes = List<Map<String, dynamic>>.from(msg['classes']);
+                      ),
+                      SizedBox(height: 16), // Space between horizontal ListView and text
+                      Row(
+                        children: [
+                          Icon(Icons.task_outlined, color: Colors.brown, size: 24),
+                          SizedBox(width: 8),
+                          Text(
+                            'Scheduled Tasks',
+                            style: TextStyle(
+                              color: Colors.brown,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 16), // Space between header and list
+                      StreamBuilder<QuerySnapshot>(
+                        stream: _stream, // Stream of all the assignments
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return Center(
+                              child: CircularProgressIndicator(
+                                backgroundColor: Color(0xFF679289),
+                              ),
+                            );
+                          }
+                          final assignmentList = snapshot.data!.docs;
+                          List<AssignmentBubble> myAllAssignments = []; // My assignments (teacher's POV)
+                          for (var msg in assignmentList) {
+                            final dynamic assignmentId = msg['id'];
+                            final dynamic title = msg['title'] ?? '';
+                            final dynamic teacher = widget.name ?? '';
+                            final dynamic instructions = msg['instructions'] ?? '';
+                            final dynamic deadline = msg['deadline'] ?? '';
+                            final List<Map<String, dynamic>> classes = List<Map<String, dynamic>>.from(msg['classes']);
 
-                      AssignmentBubble _bubble = AssignmentBubble(
-                        assId: assignmentId,
-                        title: title,
-                        teacher: teacher,
-                        instructions: instructions,
-                        deadline: deadline,
-                        classes: classes,
-                      );
-                      if (msg['teacherId'] == widget.id) {
-                        myAllAssignments.add(_bubble);
-                      }
-                    }
-                    if (myAllAssignments.isEmpty) {
-                      return Center(
-                        child: Text(
-                          'No Assignments Found',
-                          style: TextStyle(color: Colors.brown, fontSize: 16),
-                        ),
-                      );
-                    }
-                    return ListView(
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      children: myAllAssignments,
-                    );
-                  },
-                ),
-                SizedBox(height: 20),
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => TeacherUploadPage(id: widget.id!)),
-                      );
-                    },
-                    child: Text('Allocate Assignments', style: TextStyle(color: Colors.white)),
-                    style: ElevatedButton.styleFrom(
-                      primary: Theme.of(context).colorScheme.secondary,
-                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
+                            AssignmentBubble _bubble = AssignmentBubble(
+                              assId: assignmentId,
+                              title: title,
+                              teacher: teacher,
+                              instructions: instructions,
+                              deadline: deadline,
+                              classes: classes,
+                            );
+                            if (msg['teacherId'] == widget.id) {
+                              myAllAssignments.add(_bubble);
+                            }
+                          }
+                          if (myAllAssignments.isEmpty) {
+                            return Center(
+                              child: Text(
+                                'No Assignments Found',
+                                style: TextStyle(color: Colors.brown, fontSize: 16),
+                              ),
+                            );
+                          }
+                          return ListView(
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            children: myAllAssignments,
+                          );
+                        },
                       ),
-                      textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
+                      SizedBox(height: 20),
+                      Center(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => TeacherUploadPage(id: widget.id!)),
+                            );
+                          },
+                          child: Text('Allocate Assignments', style: TextStyle(color: Colors.white)),
+                          style: ElevatedButton.styleFrom(
+                            primary: Theme.of(context).colorScheme.secondary,
+                            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                    ],
                   ),
-                ),
-                SizedBox(height: 10),
-              ],
-            ),
-          ],
+                ],
+              );
+            }
+          },
         ),
       ),
     );
   }
 }
+
+
+// class _HistoryState extends State<History> {
+//   late Stream<QuerySnapshot> _stream;
+//
+//   List<String> chatIds = []; // doc inside chat-collection
+//   List<Student> newMessageStudentModels = [];
+//   List<ChatToStudentBubble> allChatBubbles = []; // Contains that circle-widget on the top
+//   List<String> newMessageStudentIds = [];
+//
+//   Future<void> initMethods() async {
+//     // Fetch chatIds associated with the widget's id
+//     chatIds = await AuthMethods().getChatModel(widget.id!);
+//
+//     // Fetch the corresponding student models and ids from the chatIds
+//     newMessageStudentModels = await AuthMethods().getStudentsModelsFromChatIds(chatIds);
+//     newMessageStudentIds = await AuthMethods().getStudentIdsFromChatIds(chatIds);
+//
+//     // Ensure the lengths of newMessageStudentModels and newMessageStudentIds are the same
+//     int n = newMessageStudentModels.length;
+//     if (newMessageStudentModels.isNotEmpty) {
+//       for (int i = 0; i < n; i++) {
+//         // Create and add ChatToStudentBubble with both studentId and studentModel
+//         setState(() {
+//           allChatBubbles.add(
+//             ChatToStudentBubble(
+//               studentId: newMessageStudentIds[i],
+//               studentModel: newMessageStudentModels[i],
+//               teacherId: widget.id!,
+//             ),
+//           );
+//         });
+//       }
+//     }
+//
+//   }
+//
+//   @override
+//   void initState() {
+//     super.initState();
+//     _stream = AuthMethods().getAssignmentStream();
+//     initMethods();
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       debugShowCheckedModeBanner: false,
+//       home: Scaffold(
+//         appBar: AppBar(
+//           leading: Container(
+//             margin: EdgeInsets.all(13),
+//             child: GestureDetector(
+//               onTap: () {
+//                 Navigator.pop(context);
+//               },
+//               child: Container(
+//                 decoration: BoxDecoration(
+//                   color: Theme.of(context).colorScheme.secondary.withOpacity(0.5),
+//                   borderRadius: BorderRadius.circular(30),
+//                   boxShadow: [
+//                     BoxShadow(
+//                       color: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
+//                       spreadRadius: 3,
+//                       blurRadius: 5,
+//                       offset: Offset(0, 2), // Changes position of shadow
+//                     ),
+//                   ],
+//                 ),
+//                 child: Padding(
+//                   padding: EdgeInsets.all(6),
+//                   child: Icon(Icons.arrow_back_ios, color: Colors.brown, size: 18),
+//                 ),
+//               ),
+//             ),
+//           ),
+//           title: Text(
+//             "${widget.name}",
+//             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+//           ),
+//           backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+//         ),
+//
+//
+//         body: ListView(
+//           padding: EdgeInsets.all(16.0), // Add padding to the entire screen
+//           children: [
+//             Column(
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 SizedBox(
+//                   height: 100, // Adjust the height to fit the content of horizontal ListView
+//                   child: ListView(
+//                     scrollDirection: Axis.horizontal,
+//                     children: allChatBubbles,
+//                   ),
+//                 ),
+//                 SizedBox(height: 16), // Space between horizontal ListView and text
+//                 Row(
+//                   children: [
+//                     Icon(Icons.task_outlined, color: Colors.brown, size: 24),
+//                     SizedBox(width: 8),
+//                     Text(
+//                       'Scheduled Tasks',
+//                       style: TextStyle(
+//                         color: Colors.brown,
+//                         fontSize: 20,
+//                         fontWeight: FontWeight.bold,
+//                       ),
+//                     ),
+//                   ],
+//                 ),
+//                 SizedBox(height: 16), // Space between header and list
+//                 StreamBuilder<QuerySnapshot>(
+//                   stream: _stream, // Stream of all the assignments
+//                   builder: (context, snapshot) {
+//                     if (!snapshot.hasData) {
+//                       return Center(
+//                         child: CircularProgressIndicator(
+//                           backgroundColor: Color(0xFF679289),
+//                         ),
+//                       );
+//                     }
+//                     final assignmentList = snapshot.data!.docs;
+//                     List<AssignmentBubble> myAllAssignments = []; // My assignments (teacher's POV)
+//                     for (var msg in assignmentList) {
+//                       final dynamic assignmentId = msg['id'];
+//                       final dynamic title = msg['title'] ?? '';
+//                       final dynamic teacher = widget.name ?? '';
+//                       final dynamic instructions = msg['instructions'] ?? '';
+//                       final dynamic deadline = msg['deadline'] ?? '';
+//                       final List<Map<String, dynamic>> classes = List<Map<String, dynamic>>.from(msg['classes']);
+//
+//                       AssignmentBubble _bubble = AssignmentBubble(
+//                         assId: assignmentId,
+//                         title: title,
+//                         teacher: teacher,
+//                         instructions: instructions,
+//                         deadline: deadline,
+//                         classes: classes,
+//                       );
+//                       if (msg['teacherId'] == widget.id) {
+//                         myAllAssignments.add(_bubble);
+//                       }
+//                     }
+//                     if (myAllAssignments.isEmpty) {
+//                       return Center(
+//                         child: Text(
+//                           'No Assignments Found',
+//                           style: TextStyle(color: Colors.brown, fontSize: 16),
+//                         ),
+//                       );
+//                     }
+//                     return ListView(
+//                       shrinkWrap: true,
+//                       physics: NeverScrollableScrollPhysics(),
+//                       children: myAllAssignments,
+//                     );
+//                   },
+//                 ),
+//                 SizedBox(height: 20),
+//                 Center(
+//                   child: ElevatedButton(
+//                     onPressed: () {
+//                       Navigator.push(
+//                         context,
+//                         MaterialPageRoute(builder: (context) => TeacherUploadPage(id: widget.id!)),
+//                       );
+//                     },
+//                     child: Text('Allocate Assignments', style: TextStyle(color: Colors.white)),
+//                     style: ElevatedButton.styleFrom(
+//                       primary: Theme.of(context).colorScheme.secondary,
+//                       padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+//                       shape: RoundedRectangleBorder(
+//                         borderRadius: BorderRadius.circular(30),
+//                       ),
+//                       textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+//                     ),
+//                   ),
+//                 ),
+//                 SizedBox(height: 10),
+//               ],
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
 
 class AssignmentBubble extends StatefulWidget {
   final dynamic assId; //id
