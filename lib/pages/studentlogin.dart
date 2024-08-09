@@ -1,3 +1,4 @@
+import 'package:assignmates/utilities/showSnackbar.dart';
 import 'package:flutter/material.dart';
 import 'studentsignup.dart';
 import 'package:assignmates/database/database.dart';
@@ -59,7 +60,10 @@ class StudentLoginScreen extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () async {
                     Student? retVal=await AuthMethods().loginStudent(email.text, password.text);
-                    if(retVal?.enroll!=''){
+                    if(retVal==null){
+                      showCustomSnackbar(context, "Student credentials don't match");
+                    }
+                    else if(retVal?.enroll!=''){
                       //fetch info corresponding to this user
                       Navigator.push(
                         context,

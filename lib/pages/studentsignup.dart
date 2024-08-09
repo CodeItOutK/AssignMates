@@ -1,4 +1,5 @@
 import 'package:assignmates/database/database.dart';
+import 'package:assignmates/utilities/showSnackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:assignmates/student/record.dart';
 
@@ -99,6 +100,7 @@ class StudentSignupScreen extends StatelessWidget {
                 decoration: const InputDecoration(
                   labelText: 'Enrollment No.',
                   border: OutlineInputBorder(),
+                  hintText: 'Example-DE21654',
                 ),
               ),
               const SizedBox(height: 20),
@@ -121,12 +123,22 @@ class StudentSignupScreen extends StatelessWidget {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () async {
-                  String retVal=await AuthMethods().signUpStudent(email.text, password.text, name.text,enroll.text,branch!,section!,year!);
-                  if(retVal=="success"){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => StudentRecords(name: name.text,email: email.text,enroll: enroll.text,branch: branch!,year: year!,section: section!,)),
-                    );
+                  if(enroll.text==''){
+                    showCustomSnackbar(context, "Enrollment Field can't be null");
+                  }
+                  else if(name.text==''){
+                    showCustomSnackbar(context, "Name Field can't be null");
+                  }
+                  else{
+                    String retVal=await AuthMethods().signUpStudent(email.text, password.text, name.text,enroll.text,branch!,section!,year!);
+                    if(retVal=="success"){
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => StudentRecords(name: name.text,email: email.text,enroll: enroll.text,branch: branch!,year: year!,section: section!,)),
+                      );
+                    }else{
+                      showCustomSnackbar(context, retVal);
+                    }
                   }
                   // Handle sign-up logic here
                   // Example: AuthMethods.signUpUser(email.text, password.text, name.text, enroll.text, branch)

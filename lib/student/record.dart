@@ -375,7 +375,7 @@ class _AssignmentBubbleState extends State<AssignmentBubble> {
   void _startTimer(var timeStamp) {
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       // Convert timeStamp to Indian Standard Time (IST)
-      DateTime istTimeStamp = timeStamp.toDate().toUtc().add(Duration(hours: 5, minutes: 30));
+      DateTime istTimeStamp = timeStamp.toDate().toUtc();
 
       _timeUntil = OurTimeLeft().timeLeft(istTimeStamp);
       setState(() {

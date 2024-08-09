@@ -2,9 +2,11 @@ import 'dart:io';
 import 'package:assignmates/models/assignments.dart';
 import 'package:assignmates/models/student.dart';
 import 'package:assignmates/models/teacher.dart';
+import 'package:assignmates/utilities/showSnackbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/src/widgets/framework.dart';
 import 'package:path/path.dart';
 
 class AuthMethods {
@@ -140,9 +142,12 @@ class AuthMethods {
     try {
       var _authResult = await _auth.signInWithEmailAndPassword(
           email: email, password: password);
-      return await getTeacherInfo(_authResult.user!.uid);
+      if(_authResult.user!=Null){
+        return await getTeacherInfo(_authResult.user!.uid);
+      }
+      return null;
     } catch (e) {
-      print('Error logging in teacher: $e');
+      print(e.toString());
       return null;
     }
   }
@@ -151,9 +156,10 @@ class AuthMethods {
     try {
       var _authResult = await _auth.signInWithEmailAndPassword(
           email: email, password: password);
-      return await getStudentInfo(_authResult.user!.uid);
+      if(_authResult.user!=null){
+        return await getStudentInfo(_authResult.user!.uid);
+      }
     } catch (e) {
-      print('Error logging in student: $e');
       return null;
     }
   }
@@ -332,62 +338,64 @@ class AuthMethods {
 // // Get the IDs of students who have completed the assignment
   Future<dynamic> studentsDoneThatAssignment(String assId) async {
     List<String> ids = []; // IDs of students who submitted
-    DocumentSnapshot<Map<String, dynamic>> _querySnapshot = await _firestore
-        .collection('doneAssignments')
-        .doc(assId).get();
+    try{
+      DocumentSnapshot<Map<String, dynamic>> _querySnapshot = await _firestore
+          .collection('doneAssignments')
+          .doc(assId).get();
 
-    if (_querySnapshot.exists) {
-      // Access the 'submissions' array from the document
-      List<dynamic> submissions = _querySnapshot.data()?['submissions'] ?? [];
+      if (_querySnapshot.exists) {
+        // Access the 'submissions' array from the document
+        List<dynamic> submissions = _querySnapshot.data()?['submissions'] ?? [];
 
-      // Iterate through each submission map and extract the studentId
-      for (var submission in submissions) {
-        if (submission is Map<String, dynamic> && submission.containsKey('studentId')) {
-          // submission['studentId'];
-          String _studentId=submission['studentId'];
-          ids.add(_studentId);
+        // Iterate through each submission map and extract the studentId
+        for (var submission in submissions) {
+          if (submission is Map<String, dynamic> &&
+              submission.containsKey('studentId')) {
+            // submission['studentId'];
+            String _studentId = submission['studentId'];
+            ids.add(_studentId);
+          }
         }
       }
+    }finally{
       return ids;
     }
+    print('4');
+        return ids;
 
-    // for (var doc in _querySnapshot.data().forEach((key, value) { })) {
-    //   var data = doc.data() as Map<String, dynamic>;
-    //   ids.add(data[]['studentId']);
-    // }
-    // print('4');
-    // return ids;
   }
-  //COPY OF ABOVE-todo
-  // Future<List<String>> studentsDoneThatAssignment(String assId) async {
-  //   List<String> ids = []; // IDs of students who submitted
-  //   QuerySnapshot _querySnapshot = await _firestore
-  //       .collection('doneAssignments')
-  //       .doc(assId)
-  //       .collection('submissions')
-  //       .get();
+
+  // Future<List<String>> defaulterStudentIds(String assId) async {
+  //   print('1');
   //
-  //   for (var doc in _querySnapshot.docs) {
-  //     var data = doc.data() as Map<String, dynamic>;
-  //     ids.add(data['studentId']);
-  //   }
-  //   print('4');
-  //   return ids;
+  //   // Fetch the list of students assigned to the specific assignment
+  //   List<String> givenList = await getClassesForAnAssignment(assId);
+  //
+  //   // Fetch the list of students who have completed the specific assignment
+  //   List<String> doneList = await studentsDoneThatAssignment(assId);
+  //
+  //   // Calculate the difference to find defaulter students
+  //   Set<String> difference = givenList.toSet().difference(doneList.toSet());
+  //
+  //   // Convert the difference set back to a list
+  //   List<String> differenceList = difference.toList();
+  //
+  //   print('5');
+  //   return differenceList;
   // }
 
 // Get the IDs of students who are defaulters for the assignment
-  Future<List<String>> defaulterStudentIds(String assId) async {
-    print('1');
-    List<String> givenList =
-        await getClassesForAnAssignment(assId);
-    List<String> doneList = await studentsDoneThatAssignment(assId);
-    Set<String> difference = givenList.toSet()
-        .difference(doneList.toSet())
-        .cast<String>();
-    List<String> differenceList = difference.toList();
-    print('5');
-    return differenceList;
-  }
+//   Future<List<String>> defaulterStudentIds(String assId) async {
+//     print('1');
+//     List<String> givenList =
+//         await getClassesForAnAssignment(assId);
+//     List<String> doneList = await studentsDoneThatAssignment(assId);
+//     Set<String> difference = givenList.toSet()
+//         .difference(doneList.toSet());
+//     List<String> differenceList = difference.toList();
+//     print('5');
+//     return differenceList;
+//   }
 
 
 //   //saare StudentIds jinhe ye assign diya tha
@@ -486,14 +494,14 @@ class AuthMethods {
   }
 
   getChatModel(String teacherId)async{
-    List<String>docIds=[];
+    Set<String>docIds={};
     QuerySnapshot _qs=await _firestore.collection('chat').get();
     for (var v in _qs.docs){
       if(v['teacherId']==teacherId){
         docIds.add(v.id);
       }
     }
-    return docIds;
+    return docIds.toList();
   }
 
   getStudentsModelsFromChatIds(List<String>docIds)async{
