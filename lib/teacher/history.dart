@@ -250,7 +250,7 @@ class _HistoryState extends State<History> {
     );
   }
 }
-
+//todo->Teacher may want to remove an Assignment-Widget once it has exceeded deadline from the db....................
 
 class AssignmentBubble extends StatefulWidget {
   final dynamic assId; //id
@@ -449,12 +449,36 @@ class _AssignmentBubbleState extends State<AssignmentBubble> {
                   child:Visibility(
                     visible: _timeUntil[0]=='Blocked Assignment'?true:false, // Set to false to hide the widget
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center, // Center alignment for main row
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween, // Space between for alignment
                       children: [
-                        Icon(Icons.privacy_tip_outlined,color: Colors.red,),
-                        SizedBox(width: 5,),
-                        Text('View defaulter Students',style: TextStyle(color: Colors.red,decorationColor: Colors.red,decoration: TextDecoration.underline),),
+                        Expanded(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center, // Center alignment for inner row
+                            children: [
+                              Icon(Icons.privacy_tip_outlined, color: Colors.red),
+                              SizedBox(width: 5),
+                              Text(
+                                'View defaulter Students',
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  decorationColor: Colors.red,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: (){
+                            AuthMethods().deleteAssignment(widget.assId);
+                            setState(() {
+
+                            });
+                          },
+                            child: Icon(Icons.delete,color: Colors.red,)),
                       ],
-                    ),
+                    )
                   ),
 
                 ),

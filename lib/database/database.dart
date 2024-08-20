@@ -364,6 +364,13 @@ class AuthMethods {
         return ids;
 
   }
+  //so difficult to build up and so easy to delete :(((
+  Future<void> deleteAssignment(String assId) async {
+    await _firestore.collection('assignments').doc(assId).delete();
+    //also delete this assId's reference from doneAssignments collection
+    await _firestore.collection('doneAssignments').doc(assId).delete();
+  }
+
 
   // Future<List<String>> defaulterStudentIds(String assId) async {
   //   print('1');
